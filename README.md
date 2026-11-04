@@ -6,6 +6,8 @@ Procesgids is een webapplicatie voor organisaties die hun werkprocessen centraal
 
 ![Interactief procesdiagram met rollen en verbonden stappen](docs/images/procesgids-interactief.png)
 
+[Ontwerpen en tekenen](#processen-ontwerpen-en-tekenen) · [Normen en borging](#normen-audits-en-borging) · [AI-functies](#ai-in-procesgids) · [Screenshots](#screenshots) · [Demo starten](#probeer-de-demo)
+
 ## AI in Procesgids
 
 | Functie | Wat je ermee kunt |
@@ -16,18 +18,32 @@ Procesgids is een webapplicatie voor organisaties die hun werkprocessen centraal
 
 AI gebruikt de geconfigureerde provider via de backend. Publiceren verloopt via de normale rechten en beoordelingsworkflow. De lokale portfolio-demo toont de interface met voorbeeldgegevens. Voor echte AI-aanroepen configureert een beheerder de koppeling. [AI configureren](docs/deploy.md#8-ai-assistent-en-openai-koppeling-optioneel)
 
-## Van ontwerp tot uitvoering en audit
+## Processen ontwerpen en tekenen
 
-| Onderdeel | Wat je ermee kunt |
+- **Teken zelf op het canvas.** Maak rollen en zwembanen aan en plaats startpunten, acties, beslissingen, berichten, subprocessen en eindpunten. Verbind stappen, geef beslisroutes een naam en leg vast wie welke stap uitvoert. Gebruik automatische indeling, zoom en ongedaan maken tijdens het tekenen.
+- **Werk de instructie per stap uit.** Leg activiteiten, toelichtingen en beslisroutes vast. Gebruik **Formulieren & controles** om de details te bewerken en stappen binnen of tussen secties te verplaatsen. De gezondheidscontrole wijst op problemen in de processtructuur.
+- **Bekijk hetzelfde model vanuit verschillende invalshoeken.** Wissel tussen brongetrouwe visualisatie, interactief diagram, flowchart, BPMN-weergave, SIPOC, value stream en tabel. Filter op rol of open de Procesatlas om te zien waar een proces overgaat in een ander proces.
+- **Neem bestaande diagrammen over.** Importeer uit Visio (.vsdx), draw.io en Lucid Standard, of gebruik PDF- en CSV/TSV-import voor geschikte procesdocumenten en tabellen. Controleer bij Visio de gekozen pagina, rollen en verbindingen voordat je verder tekent. Exporteer naar onder meer bewerkbare Visio- of draw.io-bestanden. De uitwisseling hangt af van het formaat.
+
+## Normen, audits en borging
+
+| Onderdeel | Hoe het werkt |
 | --- | --- |
-| **Visuele proceseditor** | Modelleer met zwembanen, rollen, acties, beslissingen en subprocessen. Voeg formulieren en controles toe. Bekijk dezelfde werkwijze als interactief diagram, tabel of in weergaven zoals flowchart, BPMN en SIPOC. |
-| **Import en export** | Neem bestaande processen over uit onder meer Visio, draw.io, Lucidchart, PDF of een CSV/TSV-tabel. Controleer bij Visio de gekozen pagina, rollen en herkende verbindingen voordat je verdergaat in de editor. De mogelijkheden hangen af van het bestandsformaat. |
-| **Procesmanager en publicatie** | Bekijk concepten, ingediende wijzigingen, feedback en borgingssignalen. Dien een werkversie in voor review, vergelijk revisies en publiceer na goedkeuring. |
-| **Stap voor stap** | Doorloop een gepubliceerde werkinstructie vanaf het passende startpunt. Kies bij beslissingen het vervolg en voer verplichte controles uit. Medewerkers kunnen ook zoeken, favoriete processen bewaren en verbetersuggesties indienen. |
-| **Procesatlas** | Zie hoe werkstromen aan elkaar gekoppeld zijn en klik door van een hoofdproces naar een subproces. |
-| **Normcoach en auditvoorbereiding** | Doorloop vragen per gekozen normenkader, leg bevindingen vast en vertaal verbeterpunten naar procesconcepten. Koppel processen en stappen aan normen en volg reviewdata en ontbrekend bewijs in de auditomgeving. |
-| **Organisatiebeheersing** | Breng normen, risico’s, maatregelen, bewijs en opvolging bij elkaar. Plan controles en bekijk het actuele beheersingsbeeld. |
-| **Beheer en toegang** | Gebruik lokale accounts of Microsoft Entra ID en wijs rechten toe voor kijken, suggesties, bewerken, goedkeuren en beheren. |
+| **Normscope** | Kies de kaders die voor je organisatie van toepassing zijn. De ingebouwde catalogus bevat onder meer ISO 9001, ISO/IEC 27001, ISO 14001, ISO 45001, ISO 22301, BPMN, NIS2 en AVG. Welke toetsen en controles beschikbaar zijn, verschilt per kader. |
+| **Eigen normenkaders** | Werk een kader uit als concept, beoordeel het en publiceer het in de catalogus. Een beheerder activeert het daarna afzonderlijk in de normscope. Met een AI-koppeling kun je ondersteuning krijgen bij het uitwerken van een kaderconcept. |
+| **Normcoach** | Start een normtoets en loop vragen door met aanwijzingen voor het verwachte bewijs. Leg je antwoord, motivering en bewijsreferentie vast. Koppel een afwijking aan een proces en open die in de editor als mogelijke verbetering. |
+| **Normen & audits** | Bekijk normkoppelingen en het overzicht per proces in de auditmatrix. Gebruik de proceskadercontrole voor ondersteunde kaders om aandachtspunten in het procesmodel te vinden. Bij een geselecteerde stap zijn relevante kaderbevindingen in de editor zichtbaar. |
+| **Organisatiebeheersing** | Bekijk normen en verplichtingen, risico’s en maatregelen, audits en bewijs, en openstaande opvolging in samenhang. Gebruik het overzicht van geplande controles en het actuele beheersingsbeeld om het werk te verdelen en op te volgen. |
+| **Borging in de tijd** | Maak eigenaarschap en reviewritme zichtbaar. Gebruik signalen zoals ontbrekend eigenaarschap of een verlopen review om processen opnieuw te beoordelen. Leg de uitkomst en het bewijs van controles vast en volg verbeteringen op. |
+
+Een kwaliteitsmanager kan bijvoorbeeld een normvraag beantwoorden, de bewijsreferentie vastleggen en een afwijking koppelen aan het proces waarin ze optreedt. De procesbeheerder kan de bevinding in de editor openen en een aanpassing als concept uitwerken, eventueel met een AI-tekstvoorstel. Beoordeling van de proceswijziging en sluiting van de bevinding zijn afzonderlijke menselijke besluiten. De normtoets ondersteunt auditvoorbereiding en opvolging.
+
+## Publiceren en werken met processen
+
+- **Procesmanager.** Bekijk ingediende wijzigingen, concepten, feedback en borgingssignalen vanuit één werkoverzicht. Vergelijk revisies, dien een werkversie in voor review en publiceer na goedkeuring.
+- **Werkinstructies.** Zoek processen, bewaar favorieten, open de gepubliceerde versie als plaat of tabel en bekijk wie verantwoordelijk is per stap. Medewerkers kunnen verbetersuggesties indienen vanuit een processtap.
+- **Stap voor stap.** Kies het startpunt dat bij de situatie past, volg de beslisroute en doorloop de verplichte controles. Zo kan een medewerker bijvoorbeeld dezelfde retouraanvraag via de website of via de interne service starten.
+- **Toegang.** Gebruik lokale accounts of Microsoft Entra ID. Ken rechten toe voor kijken, suggesties, bewerken, goedkeuren en beheren.
 
 ## Screenshots
 
