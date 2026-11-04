@@ -6,7 +6,7 @@ Procesgids is een webapplicatie voor organisaties die hun werkprocessen centraal
 
 ![Interactief procesdiagram met rollen en verbonden stappen](docs/images/procesgids-interactief.png)
 
-[Ontwerpen en tekenen](#processen-ontwerpen-en-tekenen) · [Normen en borging](#normen-audits-en-borging) · [AI-functies](#ai-in-procesgids) · [Screenshots](#screenshots) · [Demo starten](#probeer-de-demo)
+[Ontwerpen en tekenen](#processen-ontwerpen-en-tekenen) · [Normen en borging](#normen-audits-en-borging) · [AI-functies](#ai-in-procesgids) · [Screenshots](#screenshots) · [Demo starten](#probeer-de-demo) · [Functieoverzicht](docs/FUNCTIEOVERZICHT.md)
 
 ## AI in Procesgids
 
@@ -44,6 +44,17 @@ Een kwaliteitsmanager kan bijvoorbeeld een normvraag beantwoorden, de bewijsrefe
 - **Werkinstructies.** Zoek processen, bewaar favorieten, open de gepubliceerde versie als plaat of tabel en bekijk wie verantwoordelijk is per stap. Medewerkers kunnen verbetersuggesties indienen vanuit een processtap.
 - **Stap voor stap.** Kies het startpunt dat bij de situatie past, volg de beslisroute en doorloop de verplichte controles. Zo kan een medewerker bijvoorbeeld dezelfde retouraanvraag via de website of via de interne service starten.
 - **Toegang.** Gebruik lokale accounts of Microsoft Entra ID. Ken rechten toe voor kijken, suggesties, bewerken, goedkeuren en beheren.
+
+## Overige functies en koppelingen
+
+| Onderdeel | Wat er beschikbaar is |
+| --- | --- |
+| **Werkvloer** | Proceszoeken, favorieten, rolfilters, detail per stap, afdrukweergave, kioskmodus, oefenmodus, persoonlijke punten en badges en een ingebouwde gebruikersgids. |
+| **Samenwerking** | Suggesties vanuit een processtap, afhandeling door beheerders, versieverschillen, archivering en een auditlog voor acties en menselijke beoordelingen. |
+| **Koppelingen** | Microsoft Dynamics 365 Business Central voor order- en creditinformatie, e-mailmeldingen en Teams- of Slack-webhooks. |
+| **Organisatiebeheer** | Gebruikers en rollen, lokale inlog of Entra ID, eigen naam, kleuren en logo, geplande back-ups en beheer van AI-providers en sleutels. |
+
+Bekijk ook het [volledige functieoverzicht per scherm](docs/FUNCTIEOVERZICHT.md) voor de mogelijkheden, benodigde rechten en koppelingen.
 
 ## Screenshots
 
