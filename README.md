@@ -16,6 +16,20 @@ Procesgids is een webapplicatie voor organisaties die hun werkprocessen centraal
 
 Met een geconfigureerde AI-provider kun je ook een procesvoorstel uit tekst maken. De gebruiker controleert rollen en routes voordat het voorstel naar de editor gaat.
 
+## Screenshots
+
+De beelden komen uit de lokale demo. Klik op een screenshot om het op ware grootte te bekijken.
+
+| Procesmanager | Procesatlas |
+| --- | --- |
+| [![Dashboard met werkvoorraad en signalen](docs/images/procesmanager.png)](docs/images/procesmanager.png) | [![Procesketen met gekoppelde subprocessen](docs/images/procesatlas.png)](docs/images/procesatlas.png) |
+| Volg reviews, concepten en signalen op. | Bekijk waar processen op elkaar aansluiten. |
+
+| Proceseditor | Stap voor stap |
+| --- | --- |
+| [![Visuele editor met zwembanen en procesinstellingen](docs/images/proceseditor.png)](docs/images/proceseditor.png) | [![Keuze tussen twee startroutes voor een retouraanvraag](docs/images/stap-voor-stap.png)](docs/images/stap-voor-stap.png) |
+| Bewerk processtappen, rollen en routes. | Kies als medewerker de route die past bij je situatie. |
+
 ## Probeer de demo
 
 Installeer [Node.js 24](https://nodejs.org/) en voer vanuit de repository uit:
