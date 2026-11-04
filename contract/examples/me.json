@@ -1,0 +1,10 @@
+{
+  "user": {
+    "id": "u-001",
+    "naam": "Demo Gebruiker",
+    "email": "demo@example.com",
+    "bron": "local",
+    "rollen": ["kijken", "suggesties", "bewerken", "goedkeuren"],
+    "groepen": []
+  }
+}

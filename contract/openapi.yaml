@@ -1,0 +1,2632 @@
+openapi: 3.1.0
+info:
+  title: Service Procesgids API
+  version: "1.15.0"
+  description: >
+    Gedeeld API-contract tussen frontend (Claude) en backend (Codex).
+    De schema's spiegelen /contract/model.ts (bron van waarheid).
+    Status: v1.15 — development-session, AI Process Steward en brongebonden
+    high-level kaderconcepten zijn expliciete, begrensde capabilities.
+    Privacybewuste AI-traces registreren metadata en hashes; een custom kader
+    vereist afzonderlijke menselijke publicatie en activering.
+servers:
+  - url: /api
+    description: Relatief aan de host; de backend serveert ook de frontend-build.
+
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+
+tags:
+  - name: Config
+  - name: Auth
+  - name: Admin
+  - name: Processen
+  - name: Werkruimte
+  - name: Workflow
+  - name: Suggesties
+  - name: Import
+  - name: Uitwisseling
+  - name: Bestanden
+  - name: ISO
+  - name: Assurance
+  - name: AI
+
+paths:
+  /health:
+    get:
+      summary: Liveness; bevestigt dat het serverproces verzoeken verwerkt.
+      security: []
+      responses:
+        "200": { description: Serverproces actief. }
+  /health/ready:
+    get:
+      summary: Readiness na initialisatie; controleert de databaseverbinding.
+      security: []
+      responses:
+        "200": { description: Database bereikbaar en serverinitialisatie voltooid. }
+        "503": { description: Database niet bereikbaar. }
+  /config:
+    get:
+      tags: [Config]
+      summary: Actieve modi van de app (auth/storage/online).
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AppConfig" }
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: Huidige gebruiker met effectieve rollen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Inloggen in zelfstandige modus (authMode=local).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [gebruikersnaam, wachtwoord]
+              properties:
+                gebruikersnaam: { type: string }
+                wachtwoord: { type: string, format: password }
+      responses:
+        "200":
+          description: Ingelogd
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { description: Meer dan 20 loginpogingen per client-IP binnen één minuut. }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Uitloggen.
+      responses:
+        "204": { description: Uitgelogd }
+
+  /auth/development-session:
+    post:
+      tags: [Auth]
+      summary: Tijdelijke loopback-only testsessie in een expliciete Debug/Development-runtime.
+      description: >
+        Alleen beschikbaar wanneer de server developmentLoginAvailable meldt.
+        Vereist de header X-SPG-Development-Session: 1 en geeft nooit een
+        persistente productiecredential uit.
+      security: []
+      parameters:
+        - name: X-SPG-Development-Session
+          in: header
+          required: true
+          schema: { type: string, const: "1" }
+      responses:
+        "200":
+          description: Tijdelijke lokale testsessie geopend.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeResponse" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: Lokale gebruikers ophalen. Alleen authMode=local; vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LocalUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Admin]
+      summary: Lokale gebruiker aanmaken. Alleen authMode=local; vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LocalUserCreateRequest" }
+      responses:
+        "201":
+          description: Aangemaakt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LocalUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /admin/users/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Admin]
+      summary: Eén lokale gebruiker ophalen. Alleen authMode=local; vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LocalUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Admin]
+      summary: Lokale gebruiker wijzigen. Alleen authMode=local; vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LocalUserUpdateRequest" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LocalUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/users/{id}/password:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Admin]
+      summary: Wachtwoord van lokale gebruiker wijzigen. Alleen authMode=local; vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LocalPasswordChangeRequest" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LocalUser" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /processes:
+    get:
+      tags: [Processen]
+      summary: Lijst van de laatste goedgekeurde procespublicaties.
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/ProcessStatus" }
+        - name: q
+          in: query
+          description: Vrije zoekterm.
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProcessSummary" }
+    post:
+      tags: [Processen]
+      summary: Nieuw proces aanmaken (status 'concept'). Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "201":
+          description: Aangemaakt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Processen]
+      summary: Laatste goedgekeurde publicatie van één proces.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Processen]
+      summary: Proces wijzigen (maakt een nieuwe conceptversie). Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+    delete:
+      tags: [Processen]
+      summary: Proces verwijderen/archiveren. Vereist rol 'beheren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "204": { description: Verwijderd }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /workspace/processes:
+    get:
+      tags: [Werkruimte]
+      summary: Actuele werkversies voor redacteuren en goedkeurders.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/ProcessStatus" }
+        - name: q
+          in: query
+          description: Vrije zoekterm.
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProcessSummary" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /workspace/processes/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Werkruimte]
+      summary: Actuele werkversie van één proces.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /processes/{id}/health:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Processen]
+      summary: Gezondheid van de actuele werkversie. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthReport" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}/ai/maintenance-analysis:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [AI]
+      summary: Analyseer één opgeslagen procesrevisie voor onderhoud.
+      description: >
+        Levert vragen, stapbevindingen en uitsluitend whitelisted
+        tekstwijzigingen. De route muteert of publiceert het proces nooit.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProcessMaintenanceAnalysisRequest" }
+      responses:
+        "200":
+          description: Gestructureerde, server-gevalideerde onderhoudsanalyse.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProcessMaintenanceAnalysis" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "503":
+          description: AI is niet expliciet geconfigureerd.
+
+  /processes/{id}/ai/runs:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [AI]
+      summary: Geef de privacybewuste AI-runhistorie van één proces.
+      description: >
+        Retourneert uitsluitend runmetadata, hashes, aantallen en eventuele
+        gebruikersfeedback. Prompts, procesinhoud, antwoorden en ruwe
+        modeluitvoer worden niet opgeslagen of geretourneerd.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Nieuwste runs eerst.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AiRun" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503":
+          description: De opgeslagen runmetadata kan niet veilig worden gelezen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /processes/{id}/ai/runs/{runId}/feedback:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: runId, in: path, required: true, schema: { type: string, pattern: "^[0-9a-fA-F]{32}$" } }
+    post:
+      tags: [AI]
+      summary: Beoordeel een afgerond AI-wijzigingsvoorstel éénmalig.
+      description: >
+        Dezelfde genormaliseerde feedback mag door dezelfde actor idempotent
+        worden herhaald. Een beoordeling van een andere actor, een afwijkende
+        tweede beoordeling of een gewijzigde/gearchiveerde procesrevisie
+        resulteert in 409. Geaccepteerde wijziging-id's moeten door deze run
+        zijn voorgesteld.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiRunFeedbackRequest" }
+      responses:
+        "200":
+          description: De run met de vastgelegde feedback.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiRun" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "503":
+          description: De runmetadata kon niet veilig worden gelezen of opgeslagen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /processes/{id}/submit:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Workflow]
+      summary: De bekeken conceptrevisie indienen ter goedkeuring. Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WorkflowRevisionRequest" }
+      responses:
+        "200":
+          description: Ingediend
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Version" }
+        "400": { description: De bekeken revisie ontbreekt of het verzoek is ongeldig. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /processes/{id}/approve:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Workflow]
+      summary: Exact de bekeken reviewrevisie goedkeuren en live zetten. Vereist rol 'goedkeuren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WorkflowRevisionRequest" }
+      responses:
+        "200":
+          description: Live gezet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Version" }
+        "400": { description: De bekeken revisie ontbreekt of het verzoek is ongeldig. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /processes/{id}/reject:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Workflow]
+      summary: De bekeken reviewrevisie afwijzen en terugzetten naar concept. Vereist rol 'goedkeuren'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedRevision]
+              properties:
+                expectedRevision: { type: integer, minimum: 1 }
+                reden: { type: string }
+      responses:
+        "200":
+          description: Afgewezen
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Version" }
+        "400": { description: De bekeken revisie ontbreekt of het verzoek is ongeldig. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /processes/{id}/versions:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Workflow]
+      summary: Volledige versiehistorie van de werkversie. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Version" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}/versions/{v}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: v, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [Workflow]
+      summary: Eén specifieke werkversie als volledig proces. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}/diff:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: from, in: query, required: true, schema: { type: integer } }
+      - { name: to, in: query, required: true, schema: { type: integer } }
+    get:
+      tags: [Workflow]
+      summary: Verschil tussen twee werkversies (per stap). Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiffReport" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}/steps/{stepId}/suggestions:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+      - { name: stepId, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Suggesties]
+      summary: Suggestie indienen bij een stap. Vereist rol 'suggesties'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, tekst]
+              properties:
+                type: { $ref: "#/components/schemas/SuggestionType" }
+                tekst: { type: string }
+      responses:
+        "201":
+          description: Aangemaakt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Suggestion" }
+
+  /suggestions:
+    get:
+      tags: [Suggesties]
+      summary: Openstaande suggesties (voor redacteuren/beheerders).
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/SuggestionStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Suggestion" }
+
+  /suggestions/{id}/resolve:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Suggesties]
+      summary: Suggestie afhandelen (verwerkt/afgewezen). Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: "#/components/schemas/SuggestionStatus" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Suggestion" }
+
+  /import/pdf:
+    post:
+      tags: [Import]
+      summary: PDF uploaden en een import-job starten. Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [bestand]
+              properties:
+                bestand: { type: string, format: binary }
+      responses:
+        "202":
+          description: Job gestart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportJob" }
+
+  /import/{jobId}:
+    parameters:
+      - { name: jobId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Import]
+      summary: Status + resultaat van een import-job (concept + zekerheidsscores).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportJob" }
+
+  /import/{jobId}/commit:
+    parameters:
+      - { name: jobId, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [Import]
+      summary: Gecorrigeerde import vastleggen als conceptproces. Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "201":
+          description: Conceptproces aangemaakt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+
+  /processes/{id}/export:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Uitwisseling]
+      summary: Actuele werkversie exporteren als JSON. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Process" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/import-json:
+    post:
+      tags: [Uitwisseling]
+      summary: Proces importeren uit JSON. Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "201":
+          description: Geïmporteerd
+          content:
+            application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+
+  /diagrams/lucid/export:
+    post:
+      tags: [Uitwisseling]
+      summary: Proces exporteren als bewerkbaar Lucid Standard Import-package.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "200":
+          description: Bewerkbaar .lucid ZIP-package
+          content:
+            x-application/vnd.lucid.standardImport:
+              schema: { type: string, format: binary }
+        "400":
+          description: Proces kon niet veilig worden geëxporteerd
+
+  /diagrams/lucid/import:
+    post:
+      tags: [Uitwisseling]
+      summary: Lucid Standard Import-package analyseren; nooit direct opslaan.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [bestand]
+              properties:
+                bestand: { type: string, format: binary }
+      responses:
+        "200":
+          description: Importreview, ook wanneer ok=false
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiagramPackageImportResult" }
+
+  /diagrams/visio/import:
+    post:
+      tags: [Uitwisseling]
+      summary: Macro-vrije VSDX veilig analyseren; ondersteunt SPG-metadata en een expliciete éénpagina-swimlane-flowchartsubset.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: pageId
+          in: query
+          required: false
+          schema: { type: string }
+          description: Expliciet gekozen Visio-pagina uit de importreview.
+        - name: defaultRole
+          in: query
+          required: false
+          schema: { type: string }
+          description: Door de gebruiker bevestigde procesrol wanneer de pagina geen swimlanes bevat.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [bestand]
+              properties:
+                bestand: { type: string, format: binary }
+      responses:
+        "200":
+          description: Importreview, ook wanneer ok=false
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiagramPackageImportResult" }
+
+  /diagrams/visio/export:
+    post:
+      tags: [Uitwisseling]
+      summary: Een macro-vrije, bewerkbare éénpagina-VSDX uit het proces en de persistente diagramlayout maken.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Process" }
+      responses:
+        "200":
+          description: Macro-vrije Microsoft Visio Drawing
+          content:
+            application/vnd.ms-visio.drawing:
+              schema: { type: string, format: binary }
+        "400":
+          description: Proces kon niet veilig binnen de ondersteunde VSDX-subset worden geëxporteerd
+
+  /diagrams/visio/export-capability:
+    get:
+      tags: [Uitwisseling]
+      summary: Typed status van de Visio-exportcapability.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Actuele exportstatus en resterende runtime-reviewkanttekening
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiagramExportBlocker" }
+
+  /files/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [Bestanden]
+      summary: Origineel bronbestand (bv. de gekoppelde PDF) ophalen.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            image/png:
+              schema: { type: string, format: binary }
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/assurance-settings:
+    get:
+      tags: [Assurance]
+      summary: Niet-verzwakbare continue-assurance-instellingen ophalen.
+      description: Monitoring staat altijd aan; 720 uur is de maximale toegestane tussenruimte.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Actuele instellingen
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceSettings" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    put:
+      tags: [Assurance]
+      summary: Actieve kaders en een gelijk of strenger controle-interval instellen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceSettingsUpdate" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceSettings" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/assurance-framework-drafts:
+    get:
+      tags: [Assurance]
+      summary: AI-kaderconcepten en menselijke besluiten ophalen.
+      description: >
+        Alleen voor beheerders. Concepten zijn high-level hulpmiddelen en
+        bewijzen zonder geverifieerde bronlocators geen volledige normdekking.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Maximaal de honderd meest recente concepten en besluiten.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AssuranceFrameworkDraft" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/assurance-framework-drafts/ai:
+    post:
+      tags: [Assurance, AI]
+      summary: Brongebonden high-level kaderconcept met AI voorbereiden.
+      description: >
+        De backend haalt de bron-URL nooit op. AI ontvangt uitsluitend de
+        zelfgeschreven publieke samenvatting. Ongeldige of niet-geconfigureerde
+        AI-uitvoer wordt fail-closed geweigerd en nooit gepubliceerd.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceFrameworkDraftCreate" }
+      responses:
+        "201":
+          description: Niet-gepubliceerd concept aangemaakt.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceFrameworkDraft" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { description: Rechtenbevestiging ontbreekt. }
+        "502": { description: Provideruitvoer is ongeldig of provider onbereikbaar. }
+        "503": { description: AI is niet expliciet geconfigureerd. }
+
+  /admin/assurance-framework-drafts/{draftId}/publish:
+    parameters:
+      - name: draftId
+        in: path
+        required: true
+        schema: { type: string, pattern: "^[0-9a-f]{32}$" }
+    post:
+      tags: [Assurance]
+      summary: Concept na drie expliciete menselijke controles publiceren.
+      description: Publicatie maakt het kader catalogusbeschikbaar maar nooit automatisch actief.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceFrameworkDraftPublish" }
+      responses:
+        "200":
+          description: Gepubliceerd, niet geactiveerd.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceFrameworkDraft" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { description: Eén of meer verplichte publicatiechecks ontbreken. }
+
+  /admin/assurance-framework-drafts/{draftId}/reject:
+    parameters:
+      - name: draftId
+        in: path
+        required: true
+        schema: { type: string, pattern: "^[0-9a-f]{32}$" }
+    post:
+      tags: [Assurance]
+      summary: Fout of onbruikbaar AI-concept auditbaar afwijzen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceFrameworkDraftReject" }
+      responses:
+        "200":
+          description: Afgewezen concept; niet catalogusbeschikbaar.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceFrameworkDraft" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /assurance/frameworks:
+    get:
+      tags: [Assurance]
+      summary: Openbare kadermetadata en hoog-over evidencevragen ophalen.
+      description: Bevat bewust geen ISO-normtekst of conformiteitsclaim.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Catalogus
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceFrameworkCatalog" }
+
+  /assurance/questionnaires:
+    get:
+      tags: [Assurance]
+      summary: Readiness-vragenlijstsessies ophalen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: frameworkId
+          in: query
+          schema: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Sessies
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AssuranceQuestionnaire" }
+    post:
+      tags: [Assurance]
+      summary: Een revisiegebonden readiness-vragenlijst starten.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceQuestionnaireStart" }
+      responses:
+        "201":
+          description: Gestart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceQuestionnaire" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /assurance/questionnaires/{sessionId}:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema: { type: string, pattern: "^[0-9a-f]{32}$" }
+    get:
+      tags: [Assurance]
+      summary: Eén readiness-vragenlijstsessie ophalen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Sessie
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceQuestionnaire" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /assurance/questionnaires/{sessionId}/answers:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema: { type: string, pattern: "^[0-9a-f]{32}$" }
+    post:
+      tags: [Assurance]
+      summary: Eén evidenceantwoord met optimistic concurrency vastleggen.
+      description: Antwoord ja vereist bewijs; nvt vereist een gemotiveerde menselijke keuze.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssuranceQuestionnaireAnswerRequest" }
+      responses:
+        "200":
+          description: Bijgewerkte sessie
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceQuestionnaire" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /assurance/monitoring/status:
+    get:
+      tags: [Assurance]
+      summary: Due-status en laatste continue-assurancerun ophalen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceMonitoringStatus" }
+
+  /assurance/runs:
+    get:
+      tags: [Assurance]
+      summary: Assurance-runs en hun deterministische bevindingen ophalen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AssuranceRun" }
+    post:
+      tags: [Assurance]
+      summary: Een handmatige deterministische readinesscontrole uitvoeren.
+      description: Dit is geen formeel audit- of certificeringsbesluit.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Afgeronde run
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceRun" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /assurance/runs/{runId}:
+    parameters:
+      - name: runId
+        in: path
+        required: true
+        schema: { type: string, pattern: "^[0-9a-f]{32}$" }
+    get:
+      tags: [Assurance]
+      summary: Eén assurance-run ophalen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Run
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssuranceRun" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /iso/overview:
+    get:
+      tags: [ISO]
+      summary: ISO-schema, auditmatrix en borging-signalen.
+      parameters:
+        - name: norm
+          in: query
+          schema: { $ref: "#/components/schemas/IsoNorm" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IsoOverview" }
+
+  /processes/{id}/iso:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [ISO]
+      summary: ISO-/borgingconfiguratie van de actuele werkversie. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IsoProcessConfig" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [ISO]
+      summary: ISO-/borgingconfiguratie van één proces wijzigen. Vereist rol 'bewerken'.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IsoProcessConfig" }
+      responses:
+        "200":
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IsoProcessConfig" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /processes/{id}/audit/start:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [ISO]
+      summary: Start een menselijke kaderbeoordeling voor de actuele procesrevisie.
+      description: >
+        De backend stempelt actor, tijd en procesrevisie. Dit start audittriage en
+        is nadrukkelijk geen certificeringsbesluit. Vereist een redactierol.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuditAssessmentStartRequest" }
+      responses:
+        "200":
+          description: Beoordeling gestart
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditAssessmentStart" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /processes/{id}/audit/confirmations:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [ISO]
+      summary: Leg één menselijke controle-uitkomst met onderbouwing vast.
+      description: >
+        Actor, tijd en procesrevisie worden uitsluitend door de backend gezet.
+        Uitkomst 'voldoet' vereist een bewijsreferentie. Een bevestiging is
+        traceerbare auditinformatie en geen certificering.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AuditConfirmationRequest" }
+      responses:
+        "200":
+          description: Menselijke beoordeling vastgelegd
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditConfirmation" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /iso/export:
+    get:
+      tags: [ISO]
+      summary: ISO-auditmatrix exporteren als CSV of JSON.
+      parameters:
+        - name: norm
+          in: query
+          schema: { $ref: "#/components/schemas/IsoNorm" }
+        - name: format
+          in: query
+          schema: { type: string, enum: [csv, json], default: csv }
+      responses:
+        "200":
+          description: Exportbestand
+          content:
+            text/csv:
+              schema: { type: string }
+            application/json:
+              schema: { $ref: "#/components/schemas/IsoOverview" }
+
+  /admin/ai-instellingen:
+    get:
+      tags: [AI]
+      summary: Veilige provider-/activatiestatus zonder providercredential.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Actuele effectieve configuratie en niet-gevoelige credentialmetadata.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiSettingsStatus" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    put:
+      tags: [AI]
+      summary: Provider, expliciet model en activatiemodus wijzigen.
+      description: >
+        apiKey bestaat tijdelijk voor backwards-compatibiliteit en wordt bij
+        ontvangst direct naar de versleutelde tenant-BYO-opslag geroteerd; deze
+        request wordt daardoor effectief mode=byo. De response bevat de waarde
+        nooit. Managed AI gebruikt uitsluitend het centrale platformprofiel.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiSettingsUpdate" }
+      responses:
+        "200":
+          description: Bijgewerkte veilige status.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiSettingsStatus" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/ai-instellingen/credential/rotate:
+    post:
+      tags: [AI]
+      summary: Tenantgebonden BYO-providercredential veilig roteren.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiCredentialRotateRequest" }
+      responses:
+        "200":
+          description: Veilige status met nieuwe fingerprint en rotatietijd.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiSettingsStatus" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/ai-instellingen/credential/revoke:
+    post:
+      tags: [AI]
+      summary: Tenantgebonden BYO-providercredential intrekken en AI fail-closed uitschakelen.
+      description: Een centraal Managed AI-platformcredential wordt nooit vanuit deze route ingetrokken.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "204": { description: Ingetrokken en uitgeschakeld. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/ai-instellingen/credential/clear:
+    post:
+      tags: [AI]
+      summary: Compatibele alias voor credential/revoke.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "204": { description: Ingetrokken en uitgeschakeld. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/ai-instellingen/test:
+    post:
+      tags: [AI]
+      summary: Providerverbinding testen zonder procesinhoud mee te sturen.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: Connectietest geslaagd.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiConnectionTestResult" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "502":
+          description: Provider niet bereikbaar of aanvraag afgewezen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Entra ID-token (gekoppelde modus).
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: spg_session
+      description: Sessiecookie (zelfstandige modus).
+
+  responses:
+    BadRequest:
+      description: Ongeldige aanvraag of route niet beschikbaar in de huidige modus.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Niet ingelogd.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Onvoldoende rechten.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Niet gevonden.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Conflict met bestaande data.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    WorkflowRevisionRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision]
+      properties:
+        expectedRevision:
+          type: integer
+          minimum: 1
+          description: Revisie van het document dat de gebruiker heeft bekeken; stale revisies geven 409.
+        opmerking: { type: string }
+    Error:
+      type: object
+      required: [code, bericht]
+      properties:
+        code: { type: string }
+        bericht: { type: string }
+
+    Role:
+      type: string
+      enum: [kijken, suggesties, bewerken, goedkeuren, beheren]
+
+    User:
+      type: object
+      required: [id, naam, bron, rollen]
+      properties:
+        id: { type: string }
+        naam: { type: string }
+        email: { type: string }
+        bron: { type: string, enum: [entra, local, development-bypass] }
+        rollen:
+          type: array
+          items: { $ref: "#/components/schemas/Role" }
+        groepen:
+          type: array
+          items: { type: string }
+
+    LocalUser:
+      type: object
+      required: [id, gebruikersnaam, naam, rollen, actief, aangemaaktOp]
+      properties:
+        id: { type: string }
+        gebruikersnaam: { type: string }
+        naam: { type: string }
+        email: { type: string, format: email }
+        rollen:
+          type: array
+          items: { $ref: "#/components/schemas/Role" }
+        actief: { type: boolean }
+        aangemaaktOp: { type: string, format: date-time }
+        gewijzigdOp: { type: string, format: date-time }
+
+    LocalUserCreateRequest:
+      type: object
+      required: [gebruikersnaam, naam, wachtwoord, rollen]
+      properties:
+        gebruikersnaam: { type: string }
+        naam: { type: string }
+        email: { type: string, format: email }
+        wachtwoord: { type: string, format: password }
+        rollen:
+          type: array
+          items: { $ref: "#/components/schemas/Role" }
+        actief: { type: boolean, default: true }
+
+    LocalUserUpdateRequest:
+      type: object
+      required: [naam, rollen, actief]
+      properties:
+        naam: { type: string }
+        email: { type: string, format: email }
+        rollen:
+          type: array
+          items: { $ref: "#/components/schemas/Role" }
+        actief: { type: boolean }
+
+    LocalPasswordChangeRequest:
+      type: object
+      required: [wachtwoord]
+      properties:
+        wachtwoord: { type: string, format: password }
+
+    MeResponse:
+      type: object
+      required: [user]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+
+    EntraPublicConfig:
+      type: object
+      required: [tenantId, clientId]
+      properties:
+        tenantId: { type: string }
+        clientId: { type: string }
+
+    AppConfig:
+      type: object
+      required: [authMode, storage, online, versie, runtime]
+      properties:
+        authMode: { type: string, enum: [entra, local] }
+        storage: { type: string, enum: [db, local] }
+        online: { type: boolean }
+        versie: { type: string }
+        entra: { $ref: "#/components/schemas/EntraPublicConfig" }
+        runtime: { $ref: "#/components/schemas/RuntimeConfig" }
+
+    RuntimeConfig:
+      type: object
+      required: [environment, profile, tenantType, mode, dataSource, isDemo, syntheticData, fallbackUsed, developmentLoginAvailable]
+      properties:
+        environment: { type: string }
+        profile: { type: string, enum: [r0] }
+        tenantType: { type: string, enum: [single-tenant] }
+        mode: { type: string, enum: [standard, demo] }
+        dataSource: { type: string, enum: [database, demo-fixtures] }
+        isDemo: { type: boolean }
+        syntheticData: { type: boolean }
+        fallbackUsed: { type: boolean, enum: [false] }
+        developmentLoginAvailable:
+          type: boolean
+          description: Alleen true voor de expliciete, lokaal begrensde development-session.
+
+    AiMode:
+      type: string
+      enum: [disabled, managed, byo]
+
+    AiActivationState:
+      type: string
+      enum:
+        [disabled, active, missing-credential, invalid-configuration,
+         managed-unavailable, legacy-disabled]
+
+    AiLegacyOAuthStatus:
+      type: object
+      required: [available, linked, productionAllowed]
+      properties:
+        available: { type: boolean }
+        linked: { type: boolean }
+        productionAllowed: { type: boolean, enum: [false] }
+
+    AiManagedCapability:
+      type: object
+      required: [available, reasonCode, nextStep]
+      properties:
+        available: { type: boolean }
+        reasonCode:
+          type: string
+          description: Niet-gevoelige machinecode voor beschikbaarheid of blokkade.
+        nextStep:
+          type: string
+          description: Concrete beheeractie; bevat nooit credentialmateriaal.
+
+    AiSettingsStatus:
+      type: object
+      required:
+        [provider, endpoint, model, mode, heeftSleutel, geconfigureerd,
+         activationState, credentialSource, storedTenantCredentialPresent,
+         legacy, productionAllowed, canTest, managedAi, legacyOAuth]
+      properties:
+        provider: { type: string, enum: [disabled, azure-openai, openai, anthropic, chatgpt, invalid] }
+        endpoint: { type: string }
+        model: { type: string }
+        mode: { $ref: "#/components/schemas/AiMode" }
+        heeftSleutel: { type: boolean }
+        geconfigureerd: { type: boolean }
+        activationState: { $ref: "#/components/schemas/AiActivationState" }
+        credentialSource:
+          type: string
+          description: >
+            tenant-protected is een write-only organisatiecredential;
+            server-configuration is uitsluitend het centrale Managed AI-profiel.
+          enum: [none, tenant-protected, server-configuration, legacy-oauth]
+        credentialFingerprint:
+          type: string
+          pattern: "^sha256:[0-9a-f]{12}$"
+        credentialUpdatedAt: { type: string, format: date-time }
+        storedTenantCredentialPresent:
+          type: boolean
+          description: >
+            Er staat een write-only tenantcredential opgeslagen, ook wanneer
+            disabled of Managed AI hem momenteel niet gebruikt.
+        storedTenantCredentialProvider:
+          type: string
+          enum: [azure-openai, openai, anthropic]
+          description: >
+            Provider waaraan de opgeslagen tenantcredential expliciet is
+            gebonden. Ontbrekend betekent fail-closed:
+            registreer een nieuwe credential voordat BYO actief kan worden.
+        errorCode: { type: string }
+        legacy: { type: boolean }
+        productionAllowed: { type: boolean }
+        canTest: { type: boolean }
+        managedAi: { $ref: "#/components/schemas/AiManagedCapability" }
+        legacyOAuth: { $ref: "#/components/schemas/AiLegacyOAuthStatus" }
+
+    AiSettingsUpdate:
+      type: object
+      properties:
+        provider: { type: string, enum: [disabled, azure-openai, openai, anthropic, chatgpt] }
+        endpoint:
+          type: string
+          description: Alleen officiële Azure OpenAI-/Azure AI Services-HTTPS-basishosts.
+        model:
+          type: string
+          description: Verplicht en expliciet zodra mode niet disabled is.
+        mode: { $ref: "#/components/schemas/AiMode" }
+        apiKey:
+          type: string
+          format: password
+          writeOnly: true
+          deprecated: true
+
+    AiCredentialRotateRequest:
+      type: object
+      required: [secret]
+      properties:
+        secret:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 1
+
+    AiConnectionTestResult:
+      type: object
+      required: [ok, provider, model, testedAt]
+      properties:
+        ok: { type: boolean, enum: [true] }
+        provider: { type: string }
+        model: { type: string }
+        testedAt: { type: string, format: date-time }
+
+    ProcessMaintenanceTrigger:
+      type: object
+      additionalProperties: false
+      required: [soort]
+      properties:
+        soort: { type: string, enum: [handmatig, health, kader, suggestie] }
+        referentieId: { type: [string, "null"] }
+        kaderId: { type: [string, "null"] }
+        titel: { type: [string, "null"] }
+        beschrijving: { type: [string, "null"] }
+
+    ProcessMaintenanceAnalysisRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision]
+      properties:
+        expectedRevision: { type: integer, minimum: 1 }
+        doel: { type: [string, "null"], maxLength: 1000 }
+        stapIds:
+          type: [array, "null"]
+          maxItems: 50
+          items: { type: string }
+        aanleiding:
+          oneOf:
+            - { $ref: "#/components/schemas/ProcessMaintenanceTrigger" }
+            - { type: "null" }
+        antwoorden:
+          type: [object, "null"]
+          maxProperties: 5
+          additionalProperties: { type: string, minLength: 1, maxLength: 2000 }
+
+    ProcessMaintenanceQuestion:
+      type: object
+      additionalProperties: false
+      required: [id, vraag, waarom, stapId, bronIds]
+      properties:
+        id: { type: string }
+        vraag: { type: string }
+        waarom: { type: string }
+        stapId: { type: [string, "null"] }
+        bronIds: { type: array, items: { type: string } }
+
+    ProcessMaintenanceIssue:
+      type: object
+      additionalProperties: false
+      required: [id, stapId, categorie, ernst, titel, bevinding, uitleg, bronIds]
+      properties:
+        id: { type: string }
+        stapId: { type: [string, "null"] }
+        categorie:
+          type: string
+          enum: [onduidelijkheid, verantwoordelijkheid, proceslogica, beheersing,
+                 bewijs, systeem, termijn, consistentie]
+        ernst: { type: string, enum: [info, waarschuwing, fout] }
+        titel: { type: string }
+        bevinding: { type: string }
+        uitleg: { type: string }
+        bronIds: { type: array, items: { type: string } }
+
+    ProcessMaintenanceField:
+      type: string
+      enum: [activiteit, toelichting, opmerking, zijnotitie, voorwaarde,
+             erpStatus, termijn, waarschuwing]
+
+    ProcessMaintenanceChange:
+      type: object
+      additionalProperties: false
+      required: [id, stapId, veld, oudeWaarde, nieuweWaarde, reden,
+                 bevestigingVereist, bronIds]
+      properties:
+        id: { type: string }
+        stapId: { type: string }
+        veld: { $ref: "#/components/schemas/ProcessMaintenanceField" }
+        oudeWaarde: { type: [string, "null"] }
+        nieuweWaarde: { type: [string, "null"] }
+        reden: { type: string }
+        bevestigingVereist: { type: boolean, const: true }
+        bronIds: { type: array, items: { type: string } }
+
+    ProcessMaintenanceSource:
+      type: object
+      additionalProperties: false
+      required: [id, type, procesId, processRevision, stapId, veld, label, contentHash]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        procesId: { type: string }
+        processRevision: { type: integer, minimum: 1 }
+        stapId: { type: [string, "null"] }
+        veld: { type: [string, "null"] }
+        label: { type: string }
+        contentHash: { type: string }
+
+    ProcessMaintenanceAnalysis:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, runId, procesId, processRevision, status,
+                 samenvatting, bronIds, vragen, issues, wijzigingen, bronnen]
+      properties:
+        schemaVersion: { type: string, const: process-maintenance.v1 }
+        runId: { type: string }
+        procesId: { type: string }
+        processRevision: { type: integer, minimum: 1 }
+        status: { type: string, enum: [vragen, voorstel, geen-wijziging] }
+        samenvatting: { type: string }
+        bronIds: { type: array, items: { type: string } }
+        vragen:
+          type: array
+          maxItems: 5
+          items: { $ref: "#/components/schemas/ProcessMaintenanceQuestion" }
+        issues:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/ProcessMaintenanceIssue" }
+        wijzigingen:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/ProcessMaintenanceChange" }
+        bronnen:
+          type: array
+          items: { $ref: "#/components/schemas/ProcessMaintenanceSource" }
+
+    AiRunFeedbackRequest:
+      type: object
+      additionalProperties: false
+      required: [beslissing]
+      properties:
+        beslissing: { type: string, enum: [accepted, rejected] }
+        reden:
+          type: string
+          minLength: 1
+          maxLength: 160
+          description: Privacybegrensde auditreden; geen contactgegevens, links, lange nummers of regeleinden.
+        geaccepteerdeWijzigingIds:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 160
+            pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"
+
+    AiRunFeedback:
+      type: object
+      additionalProperties: false
+      required: [beslissing, geaccepteerdeWijzigingIds, doorGebruiker, op]
+      properties:
+        beslissing: { type: string, enum: [accepted, rejected] }
+        reden: { type: string, minLength: 1, maxLength: 160 }
+        geaccepteerdeWijzigingIds:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 160
+            description: Eenrichtingsgehashte, ledger-interne wijziging-id.
+        doorGebruiker: { type: string }
+        op: { type: string, format: date-time }
+
+    AiRun:
+      type: object
+      additionalProperties: false
+      required: [runId, capability, procesId, processRevision, status,
+                 gestartDoor, gestartOp, vraagAantal, issueAantal, wijzigingAantal]
+      properties:
+        runId:
+          type: string
+          pattern: "^[0-9a-fA-F]{32}$"
+        capability: { type: string, const: process-maintenance }
+        procesId: { type: string }
+        processRevision: { type: integer, minimum: 1 }
+        status: { type: string, enum: [running, completed, failed, stale, cancelled] }
+        resultaatStatus: { type: string, enum: [vragen, voorstel, geen-wijziging] }
+        provider: { type: [string, "null"] }
+        model: { type: [string, "null"] }
+        gestartDoor: { type: string }
+        gestartOp: { type: string, format: date-time }
+        afgerondOp: { type: string, format: date-time }
+        duurMs: { type: integer, format: int64, minimum: 0 }
+        inputHash:
+          type: string
+          pattern: "^sha256:[0-9a-fA-F]{64}$"
+        outputHash:
+          type: string
+          pattern: "^sha256:[0-9a-fA-F]{64}$"
+        vraagAantal: { type: integer, minimum: 0, maximum: 5 }
+        issueAantal: { type: integer, minimum: 0, maximum: 20 }
+        wijzigingAantal: { type: integer, minimum: 0, maximum: 20 }
+        foutcode: { type: string, maxLength: 120 }
+        feedback: { $ref: "#/components/schemas/AiRunFeedback" }
+
+    Lane:
+      type: object
+      required: [id, naam, kleur]
+      properties:
+        id: { type: string }
+        naam: { type: string }
+        kleur: { type: string }
+
+    Section:
+      type: object
+      required: [id, naam]
+      properties:
+        id: { type: string }
+        naam: { type: string }
+
+    StepType:
+      type: string
+      enum: [actie, bericht, beslissing, subproces, start, eind, marker]
+
+    StepRoute:
+      type: object
+      required: [id, label]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        voorwaarde: { type: string }
+        naarStap: { type: string }
+        naarProces: { type: string }
+        standaard: { type: boolean }
+
+    StepSystemEventType:
+      type: string
+      enum: [actie, synchronisatie, status]
+
+    StepSystemEvent:
+      type: object
+      required: [id, type, laneId, activiteit]
+      properties:
+        id: { type: string }
+        type: { $ref: "#/components/schemas/StepSystemEventType" }
+        laneId: { type: string }
+        doelLaneId: { type: string }
+        activiteit: { type: string }
+        positie: { type: string, enum: [voor, na] }
+
+    Step:
+      type: object
+      required: [id, nummer, laneId, type, activiteit]
+      properties:
+        id: { type: string }
+        nummer: { type: string }
+        sectieId: { type: string }
+        laneId: { type: string }
+        type: { $ref: "#/components/schemas/StepType" }
+        activiteit: { type: string }
+        toelichting: { type: string }
+        opmerking: { type: string }
+        zijnotitie: { type: string }
+        doelLaneId: { type: string }
+        interactieDoelLaneId:
+          type: string
+          description: Tweede lane voor een horizontale activiteit zonder berichtpijl.
+        voorwaarde: { type: string }
+        erpStatus: { type: string }
+        termijn: { type: string }
+        waarschuwing: { type: string }
+        checklist: { type: array, items: { type: string } }
+        fotoEisen: { type: array, items: { type: string } }
+        naarStap: { type: string }
+        routes:
+          type: array
+          items: { $ref: "#/components/schemas/StepRoute" }
+        naarProces: { type: string }
+        bronZekerheid: { type: number, minimum: 0, maximum: 1 }
+        systeemGebeurtenissen:
+          type: array
+          items: { $ref: "#/components/schemas/StepSystemEvent" }
+
+    ProcessStatus:
+      type: string
+      enum: [concept, in-review, live, gearchiveerd]
+
+    ProcessSource:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [handmatig, pdf-import, tabel-import, diagram-import, visio-import, kopie] }
+        bestand: { type: string }
+        paginas: { type: array, items: { type: integer } }
+        importDatum: { type: string, format: date }
+        importZekerheid: { type: number, minimum: 0, maximum: 1 }
+
+    ProcessDiagramPoint:
+      type: object
+      required: [x, y]
+      properties:
+        x: { type: number }
+        y: { type: number }
+
+    ProcessNodePlacement:
+      type: object
+      required: [x, y]
+      properties:
+        x: { type: number }
+        y: { type: number }
+        width: { type: number, exclusiveMinimum: 0 }
+        height: { type: number, exclusiveMinimum: 0 }
+
+    ProcessEdgePlacement:
+      type: object
+      properties:
+        waypoints:
+          type: array
+          items: { $ref: "#/components/schemas/ProcessDiagramPoint" }
+        sourcePort: { type: string }
+        targetPort: { type: string }
+        labelPosition: { $ref: "#/components/schemas/ProcessDiagramPoint" }
+
+    ProcessDiagramLayout:
+      type: object
+      required: [version, coordinateSystem, nodes]
+      properties:
+        version: { type: integer, enum: [1] }
+        coordinateSystem: { type: string, enum: [px96-y-down] }
+        nodes:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/ProcessNodePlacement" }
+        edges:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/ProcessEdgePlacement" }
+
+    Process:
+      type: object
+      required: [id, hoofdproces, detailproces, versie, status, laatsteWijziging, lanes, secties, stappen]
+      properties:
+        id: { type: string }
+        hoofdproces: { type: string }
+        detailproces: { type: string }
+        versie: { type: string }
+        status: { $ref: "#/components/schemas/ProcessStatus" }
+        laatsteWijziging: { type: string, format: date }
+        revision: { type: integer }
+        bron: { $ref: "#/components/schemas/ProcessSource" }
+        lanes: { type: array, items: { $ref: "#/components/schemas/Lane" } }
+        secties: { type: array, items: { $ref: "#/components/schemas/Section" } }
+        stappen: { type: array, items: { $ref: "#/components/schemas/Step" } }
+        diagramLayout: { $ref: "#/components/schemas/ProcessDiagramLayout" }
+
+    ProcessSummary:
+      type: object
+      required: [id, hoofdproces, detailproces, versie, status, laatsteWijziging, aantalStappen, koppelingen]
+      properties:
+        id: { type: string }
+        hoofdproces: { type: string }
+        detailproces: { type: string }
+        versie: { type: string }
+        status: { $ref: "#/components/schemas/ProcessStatus" }
+        laatsteWijziging: { type: string, format: date }
+        revision: { type: integer }
+        aantalStappen: { type: integer }
+        koppelingen: { type: array, items: { type: string } }
+
+    DiagramPackageIssue:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        elementId: { type: string }
+
+    DiagramElementGeometry:
+      type: object
+      required: [externalId, semanticKind, semanticId, unit]
+      properties:
+        externalId: { type: string }
+        semanticKind: { type: string }
+        semanticId: { type: string }
+        x: { type: number }
+        y: { type: number }
+        width: { type: number }
+        height: { type: number }
+        unit: { type: string, enum: [px, in] }
+
+    DiagramPackageImportResult:
+      type: object
+      required: [ok, format, geometry, warnings, unmapped, errors, confidence]
+      properties:
+        pages:
+          type: array
+          items:
+            type: object
+            required: [id, name, number, background]
+            properties:
+              id: { type: string }
+              name: { type: string }
+              number: { type: integer }
+              background: { type: boolean }
+        ok: { type: boolean }
+        format: { type: string, enum: [lucid-standard, visio-vsdx] }
+        process: { $ref: "#/components/schemas/Process" }
+        geometry:
+          type: array
+          items: { $ref: "#/components/schemas/DiagramElementGeometry" }
+        warnings:
+          type: array
+          items: { $ref: "#/components/schemas/DiagramPackageIssue" }
+        unmapped:
+          type: array
+          items: { $ref: "#/components/schemas/DiagramPackageIssue" }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/DiagramPackageIssue" }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+
+    DiagramExportBlocker:
+      type: object
+      required: [format, code, message, requiresValidatedTemplate]
+      properties:
+        format: { type: string, enum: [visio-vsdx] }
+        code: { type: string }
+        message: { type: string }
+        requiresValidatedTemplate: { type: boolean }
+
+    Version:
+      type: object
+      required: [versieNr, procesId, status, gewijzigdDoor, gewijzigdOp]
+      properties:
+        versieNr: { type: integer }
+        procesId: { type: string }
+        status: { $ref: "#/components/schemas/ProcessStatus" }
+        gewijzigdDoor: { type: string }
+        gewijzigdOp: { type: string, format: date-time }
+        opmerking: { type: string }
+        verwerkteSuggesties: { type: array, items: { type: string } }
+
+    SuggestionType:
+      type: string
+      enum: [klopt-niet, mist, onduidelijk, werkt-anders]
+
+    SuggestionStatus:
+      type: string
+      enum: [open, in-behandeling, verwerkt, afgewezen]
+
+    Suggestion:
+      type: object
+      required: [id, procesId, type, tekst, doorGebruiker, aangemaaktOp, status]
+      properties:
+        id: { type: string }
+        procesId: { type: string }
+        stapId: { type: string }
+        type: { $ref: "#/components/schemas/SuggestionType" }
+        tekst: { type: string }
+        doorGebruiker: { type: string }
+        aangemaaktOp: { type: string, format: date-time }
+        status: { $ref: "#/components/schemas/SuggestionStatus" }
+
+    ImportJobStatus:
+      type: string
+      enum: [wachtrij, verwerken, gereed, mislukt]
+
+    ImportFieldConfidence:
+      type: object
+      required: [veld, zekerheid]
+      properties:
+        veld: { type: string }
+        zekerheid: { type: number, minimum: 0, maximum: 1 }
+        pagina: { type: integer }
+        bronTekst: { type: string }
+        opmerking: { type: string }
+
+    ImportJob:
+      type: object
+      required: [id, bestandsnaam, status, aangemaaktOp]
+      properties:
+        id: { type: string }
+        bestandsnaam: { type: string }
+        status: { $ref: "#/components/schemas/ImportJobStatus" }
+        aangemaaktOp: { type: string, format: date-time }
+        voortgang: { type: number, minimum: 0, maximum: 100 }
+        bronBestandId: { type: string }
+        conceptProces: { $ref: "#/components/schemas/Process" }
+        zekerheid:
+          type: array
+          items: { $ref: "#/components/schemas/ImportFieldConfidence" }
+        paginaAfbeeldingen: { type: array, items: { type: string } }
+        fout: { type: string }
+
+    HealthIssue:
+      type: object
+      required: [soort, ernst, bericht]
+      properties:
+        stapId: { type: string }
+        soort:
+          type: string
+          enum:
+            - geen-verantwoordelijke
+            - geen-vervolg
+            - voorwaarde-zonder-route
+            - ontbrekende-erp-status
+            - termijn-zonder-waarschuwing
+            - vervolgproces-bestaat-niet
+        ernst: { type: string, enum: [info, waarschuwing, fout] }
+        bericht: { type: string }
+
+    HealthReport:
+      type: object
+      required: [score, issues]
+      properties:
+        score: { type: number, minimum: 0, maximum: 100 }
+        issues:
+          type: array
+          items: { $ref: "#/components/schemas/HealthIssue" }
+
+    DiffReport:
+      type: object
+      required: [procesId, van, naar, wijzigingen]
+      properties:
+        procesId: { type: string }
+        van: { type: integer }
+        naar: { type: integer }
+        wijzigingen:
+          type: array
+          items:
+            type: object
+            required: [stapId, soort]
+            properties:
+              stapId: { type: string }
+              soort: { type: string, enum: [toegevoegd, verwijderd, gewijzigd] }
+              veld: { type: string }
+              oud: {}
+              nieuw: {}
+
+    AssuranceFrameworkDraftQuestion:
+      type: object
+      additionalProperties: false
+      required: [id, titel, vraag, bewijsHint]
+      properties:
+        id: { type: string, pattern: "^[a-z][a-z0-9-]{2,79}$" }
+        titel: { type: string, minLength: 3, maxLength: 120 }
+        vraag: { type: string, minLength: 10, maxLength: 500 }
+        bewijsHint: { type: string, minLength: 5, maxLength: 400 }
+
+    AssuranceFrameworkDraftCreate:
+      type: object
+      additionalProperties: false
+      required:
+        [bronUrl, bronOrganisatie, naam, editie, domein,
+         publiekeSamenvatting, gebruiksrechtenBevestigd]
+      properties:
+        bronUrl:
+          type: string
+          format: uri
+          pattern: "^https://"
+          maxLength: 500
+        bronOrganisatie: { type: string, minLength: 2, maxLength: 160 }
+        naam: { type: string, minLength: 2, maxLength: 160 }
+        editie: { type: string, minLength: 1, maxLength: 160 }
+        domein: { type: string, minLength: 2, maxLength: 180 }
+        publiekeSamenvatting:
+          type: string
+          minLength: 100
+          maxLength: 4000
+          description: Zelfgeschreven openbare samenvatting; geen gekopieerde normtekst.
+        gebruiksrechtenBevestigd: { type: boolean, const: true }
+
+    AssuranceFrameworkDraftPublish:
+      type: object
+      additionalProperties: false
+      required:
+        [expectedRevision, bronGecontroleerd, rechtenGecontroleerd,
+         highLevelBeperkingGeaccepteerd]
+      properties:
+        expectedRevision: { type: integer, minimum: 1 }
+        bronGecontroleerd: { type: boolean, const: true }
+        rechtenGecontroleerd: { type: boolean, const: true }
+        highLevelBeperkingGeaccepteerd:
+          type: boolean
+          const: true
+          description: >
+            Bevestigt dat dit concept zonder geverifieerde clausulelocators
+            geen volledige normdekking bewijst.
+
+    AssuranceFrameworkDraftReject:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, reden]
+      properties:
+        expectedRevision: { type: integer, minimum: 1 }
+        reden: { type: string, minLength: 10, maxLength: 1000 }
+
+    AssuranceFrameworkDraft:
+      type: object
+      additionalProperties: false
+      required:
+        [draftId, status, kaderId, naam, editie, domein, bronUrl,
+         bronOrganisatie, publiekeSamenvatting, gebruiksrechtenBevestigd,
+         schemaVersion, provider, model, inputHash, outputHash, vragen,
+         aangemaaktDoor, aangemaaktOp, revision, disclaimer]
+      properties:
+        draftId: { type: string, pattern: "^[0-9a-f]{32}$" }
+        status: { type: string, enum: [concept, published, rejected] }
+        kaderId: { type: string, pattern: "^custom-[a-z0-9-]+$" }
+        naam: { type: string }
+        editie: { type: string }
+        domein: { type: string }
+        bronUrl: { type: string, format: uri, pattern: "^https://" }
+        bronOrganisatie: { type: string }
+        publiekeSamenvatting: { type: string, maxLength: 4000 }
+        gebruiksrechtenBevestigd: { type: boolean, const: true }
+        schemaVersion: { type: string, const: assurance-framework-draft.v1 }
+        provider: { type: string }
+        model: { type: string }
+        inputHash: { type: string, pattern: "^[0-9A-Fa-f]{64}$" }
+        outputHash: { type: string, pattern: "^[0-9A-Fa-f]{64}$" }
+        vragen:
+          type: array
+          minItems: 3
+          maxItems: 15
+          items: { $ref: "#/components/schemas/AssuranceFrameworkDraftQuestion" }
+        aangemaaktDoor: { type: string }
+        aangemaaktOp: { type: string, format: date-time }
+        gepubliceerdDoor: { type: string }
+        gepubliceerdOp: { type: string, format: date-time }
+        bronGecontroleerdOp: { type: string, format: date-time }
+        rechtenGecontroleerdOp: { type: string, format: date-time }
+        afgewezenDoor: { type: string }
+        afgewezenOp: { type: string, format: date-time }
+        afwijsreden: { type: string, maxLength: 1000 }
+        revision: { type: integer, minimum: 1 }
+        disclaimer:
+          type: string
+          description: High-level custom hulpmiddel; geen volledige normdekking of certificeringsclaim.
+
+    AssuranceFrameworkId:
+      type: string
+      pattern: "^(?:iso9001|iso27001|iso14001|iso45001|iso22301|bpmn20|nis2|avg|custom-[a-z0-9-]+)$"
+      description: Vast publiek kader-id of expliciet gepubliceerd custom kader-id.
+
+    AssuranceFrameworkQuestion:
+      type: object
+      additionalProperties: false
+      required: [id, titel, vraag, bewijsHint]
+      properties:
+        id: { type: string }
+        titel: { type: string }
+        vraag: { type: string }
+        bewijsHint: { type: string }
+
+    AssuranceFramework:
+      type: object
+      additionalProperties: false
+      required:
+        [id, naam, editie, domein, type, bronUrl, bronOrganisatie,
+         bronGecontroleerdOp, actief, vragen]
+      properties:
+        id: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        naam: { type: string }
+        editie: { type: string }
+        domein: { type: string }
+        type:
+          type: string
+          enum: [standard, law, regulation, notation, custom]
+        bronUrl: { type: string, format: uri }
+        bronOrganisatie: { type: string }
+        bronGecontroleerdOp: { type: string, format: date }
+        actief: { type: boolean }
+        vragen:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/AssuranceFrameworkQuestion" }
+
+    AssuranceFrameworkCatalog:
+      type: object
+      additionalProperties: false
+      required: [catalogVersion, kaders]
+      properties:
+        catalogVersion: { type: string }
+        kaders:
+          type: array
+          items: { $ref: "#/components/schemas/AssuranceFramework" }
+
+    AssuranceSettingsUpdate:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, actieveKaderIds, aangevraagdIntervalUren]
+      properties:
+        expectedRevision: { type: integer, minimum: 1 }
+        actieveKaderIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        aangevraagdIntervalUren:
+          type: integer
+          enum: [24, 168, 720]
+
+    AssuranceSettings:
+      type: object
+      additionalProperties: false
+      required:
+        [actieveKaderIds, aangevraagdIntervalUren, effectiefIntervalUren,
+         maximaalIntervalUren, toegestaneIntervalUren, monitoringActief,
+         volgendeRunOp, bijgewerktOp, bijgewerktDoor, revision]
+      properties:
+        actieveKaderIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        aangevraagdIntervalUren: { type: integer, enum: [24, 168, 720] }
+        effectiefIntervalUren: { type: integer, enum: [24, 168, 720] }
+        maximaalIntervalUren: { type: integer, const: 720 }
+        toegestaneIntervalUren:
+          type: array
+          prefixItems:
+            - { type: integer, const: 24 }
+            - { type: integer, const: 168 }
+            - { type: integer, const: 720 }
+          minItems: 3
+          maxItems: 3
+        monitoringActief: { type: boolean, const: true }
+        volgendeRunOp: { type: string, format: date-time }
+        bijgewerktOp: { type: string, format: date-time }
+        bijgewerktDoor: { type: string }
+        revision: { type: integer, minimum: 1 }
+
+    AssuranceQuestionnaireStart:
+      type: object
+      additionalProperties: false
+      required: [kaderId]
+      properties:
+        kaderId: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+
+    AssuranceQuestionnaireOutcome:
+      type: string
+      enum: [ja, deels, nee, onbekend, nvt]
+
+    AssuranceQuestionnaireAnswerRequest:
+      type: object
+      additionalProperties: false
+      required: [expectedRevision, vraagId, uitkomst]
+      properties:
+        expectedRevision: { type: integer, minimum: 1 }
+        vraagId: { type: string }
+        uitkomst: { $ref: "#/components/schemas/AssuranceQuestionnaireOutcome" }
+        bewijsreferentie: { type: string, maxLength: 500 }
+        motivatie: { type: string, maxLength: 2000 }
+
+    AssuranceQuestionnaireAnswer:
+      type: object
+      additionalProperties: false
+      required: [vraagId, uitkomst, beantwoordDoor, beantwoordOp]
+      properties:
+        vraagId: { type: string }
+        uitkomst: { $ref: "#/components/schemas/AssuranceQuestionnaireOutcome" }
+        bewijsreferentie: { type: string, maxLength: 500 }
+        motivatie: { type: string, maxLength: 2000 }
+        beantwoordDoor: { type: string }
+        beantwoordOp: { type: string, format: date-time }
+
+    AssuranceReadiness:
+      type: object
+      additionalProperties: false
+      required:
+        [beantwoord, totaal, ja, deels, nee, onbekend, nvt,
+         bewijsGereed, open, disclaimer]
+      properties:
+        beantwoord: { type: integer, minimum: 0 }
+        totaal: { type: integer, minimum: 1 }
+        ja: { type: integer, minimum: 0 }
+        deels: { type: integer, minimum: 0 }
+        nee: { type: integer, minimum: 0 }
+        onbekend: { type: integer, minimum: 0 }
+        nvt: { type: integer, minimum: 0 }
+        bewijsGereed: { type: integer, minimum: 0 }
+        open: { type: integer, minimum: 0 }
+        disclaimer: { type: string }
+
+    AssuranceQuestionnaire:
+      type: object
+      additionalProperties: false
+      required:
+        [sessionId, kaderId, kaderNaam, catalogVersion, status, gestartDoor,
+         gestartOp, revision, vragen, antwoorden, readiness]
+      properties:
+        sessionId: { type: string, pattern: "^[0-9a-f]{32}$" }
+        kaderId: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        kaderNaam: { type: string }
+        catalogVersion: { type: string }
+        status: { type: string, enum: [open, gereed] }
+        gestartDoor: { type: string }
+        gestartOp: { type: string, format: date-time }
+        afgerondOp: { type: string, format: date-time }
+        revision: { type: integer, minimum: 1 }
+        vragen:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/AssuranceFrameworkQuestion" }
+        antwoorden:
+          type: array
+          items: { $ref: "#/components/schemas/AssuranceQuestionnaireAnswer" }
+        readiness: { $ref: "#/components/schemas/AssuranceReadiness" }
+
+    AssuranceFinding:
+      type: object
+      additionalProperties: false
+      required: [id, type, ernst, titel, bericht]
+      properties:
+        id: { type: string, pattern: "^[0-9a-f]{32}$" }
+        kaderId: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        procesId: { type: string }
+        vraagId: { type: string }
+        type:
+          type: string
+          enum:
+            [assessment-ontbreekt, assessment-onvolledig, assessment-gap,
+             proces-eigenaar-ontbreekt, proces-review-ontbreekt,
+             proces-review-verlopen]
+        ernst: { type: string, enum: [info, waarschuwing, fout] }
+        titel: { type: string }
+        bericht: { type: string }
+
+    AssuranceRun:
+      type: object
+      additionalProperties: false
+      required:
+        [runId, trigger, status, catalogVersion, kaderIds, gestartDoor,
+         gestartOp, findingCount, bevindingen]
+      properties:
+        runId: { type: string, pattern: "^[0-9a-f]{32}$" }
+        trigger: { type: string, enum: [handmatig, gepland] }
+        status: { type: string, enum: [running, completed, failed] }
+        catalogVersion: { type: string }
+        kaderIds:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        gestartDoor: { type: string }
+        gestartOp: { type: string, format: date-time }
+        afgerondOp: { type: string, format: date-time }
+        findingCount: { type: integer, minimum: 0 }
+        foutcode: { type: string }
+        bevindingen:
+          type: array
+          items: { $ref: "#/components/schemas/AssuranceFinding" }
+
+    AssuranceMonitoringStatus:
+      type: object
+      additionalProperties: false
+      required:
+        [monitoringActief, achterstallig, volgendeRunOp,
+         effectiefIntervalUren, actieveKaderIds, gegenereerdOp]
+      properties:
+        monitoringActief: { type: boolean, const: true }
+        achterstallig: { type: boolean }
+        volgendeRunOp: { type: string, format: date-time }
+        effectiefIntervalUren: { type: integer, enum: [24, 168, 720] }
+        actieveKaderIds:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/AssuranceFrameworkId" }
+        laatsteRun: { $ref: "#/components/schemas/AssuranceRun" }
+        gegenereerdOp: { type: string, format: date-time }
+
+    IsoNorm:
+      type: string
+      enum: [iso27001, iso9001, iso14001]
+
+    IsoProcesRol:
+      type: string
+      enum: [kern, ondersteunend]
+
+    IsoMapping:
+      type: object
+      required: [norm, rol]
+      properties:
+        norm: { $ref: "#/components/schemas/IsoNorm" }
+        clausules:
+          type: array
+          items: { type: string }
+        rol: { $ref: "#/components/schemas/IsoProcesRol" }
+        toelichting: { type: string }
+
+    ProcessGovernance:
+      type: object
+      properties:
+        eigenaar: { type: string }
+        herzieningsinterval: { type: string }
+        laatsteReview: { type: string, format: date }
+        volgendeReview: { type: string, format: date }
+
+    AuditFramework:
+      type: string
+      enum: [iso9001, iso27001, iso14001, iso45001, iso22301, bpmn20]
+
+    AuditConfirmationOutcome:
+      type: string
+      enum: [voldoet, actie-nodig, niet-van-toepassing]
+
+    AuditAssessmentStartRequest:
+      type: object
+      required: [kaderId]
+      properties:
+        kaderId: { $ref: "#/components/schemas/AuditFramework" }
+
+    AuditAssessmentStart:
+      type: object
+      required:
+        [assessmentId, procesId, kaderId, gestartDoorId, gestartDoor, gestartOp,
+         verlooptOp, processRevision, catalogVersion]
+      properties:
+        assessmentId:
+          type: string
+          pattern: "^[0-9a-f]{32}$"
+        procesId: { type: string }
+        kaderId: { $ref: "#/components/schemas/AuditFramework" }
+        gestartDoorId: { type: string }
+        gestartDoor: { type: string }
+        gestartOp: { type: string, format: date-time }
+        verlooptOp: { type: string, format: date-time }
+        processRevision: { type: integer, minimum: 1 }
+        catalogVersion: { type: string }
+
+    AuditConfirmationRequest:
+      type: object
+      required:
+        [assessmentId, expectedRevision, kaderId, controleId, uitkomst, toelichting]
+      properties:
+        assessmentId:
+          type: string
+          pattern: "^[0-9a-f]{32}$"
+        expectedRevision: { type: integer, minimum: 1 }
+        kaderId: { $ref: "#/components/schemas/AuditFramework" }
+        controleId:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9-]{1,79}$"
+        uitkomst: { $ref: "#/components/schemas/AuditConfirmationOutcome" }
+        toelichting: { type: string, minLength: 10, maxLength: 2000 }
+        bewijsreferentie:
+          type: string
+          maxLength: 500
+          description: Verplicht wanneer uitkomst 'voldoet' is.
+
+    AuditConfirmation:
+      type: object
+      required:
+        [assessmentId, catalogVersion, kaderId, controleId, uitkomst, toelichting,
+         bevestigdDoorId, bevestigdDoor, bevestigdOp, processRevision]
+      properties:
+        assessmentId:
+          type: string
+          pattern: "^[0-9a-f]{32}$"
+        catalogVersion: { type: string }
+        kaderId: { $ref: "#/components/schemas/AuditFramework" }
+        controleId:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9-]{1,79}$"
+        uitkomst: { $ref: "#/components/schemas/AuditConfirmationOutcome" }
+        toelichting: { type: string, minLength: 10, maxLength: 2000 }
+        bewijsreferentie: { type: string, maxLength: 500 }
+        bevestigdDoorId: { type: string }
+        bevestigdDoor: { type: string }
+        bevestigdOp: { type: string, format: date-time }
+        processRevision: { type: integer, minimum: 1 }
+
+    IsoProcessConfig:
+      type: object
+      required: [procesId, mappings]
+      properties:
+        procesId: { type: string }
+        mappings:
+          type: array
+          items: { $ref: "#/components/schemas/IsoMapping" }
+        governance: { $ref: "#/components/schemas/ProcessGovernance" }
+        auditBevestigingen:
+          type: array
+          readOnly: true
+          items: { $ref: "#/components/schemas/AuditConfirmation" }
+
+    BorgingSignaal:
+      type: string
+      enum: [geen-eigenaar, review-verlopen, geen-live-versie, clausule-niet-gedekt]
+
+    BorgingIssue:
+      type: object
+      required: [procesId, signaal, ernst, bericht]
+      properties:
+        procesId: { type: string }
+        norm: { $ref: "#/components/schemas/IsoNorm" }
+        signaal: { $ref: "#/components/schemas/BorgingSignaal" }
+        ernst: { type: string, enum: [info, waarschuwing, fout] }
+        bericht: { type: string }
+
+    IsoMatrixRow:
+      type: object
+      required: [procesId, hoofdproces, detailproces, norm, rol, clausules, status, borging]
+      properties:
+        procesId: { type: string }
+        hoofdproces: { type: string }
+        detailproces: { type: string }
+        norm: { $ref: "#/components/schemas/IsoNorm" }
+        rol: { $ref: "#/components/schemas/IsoProcesRol" }
+        clausules:
+          type: array
+          items: { type: string }
+        eigenaar: { type: string }
+        status: { $ref: "#/components/schemas/ProcessStatus" }
+        laatsteReview: { type: string, format: date }
+        volgendeReview: { type: string, format: date }
+        borging:
+          type: array
+          items: { $ref: "#/components/schemas/BorgingIssue" }
+
+    IsoOverview:
+      type: object
+      required: [hoofdprocessen, rijen, signalen, gegenereerdOp]
+      properties:
+        norm: { $ref: "#/components/schemas/IsoNorm" }
+        hoofdprocessen:
+          type: array
+          items: { type: string }
+        rijen:
+          type: array
+          items: { $ref: "#/components/schemas/IsoMatrixRow" }
+        signalen:
+          type: array
+          items: { $ref: "#/components/schemas/BorgingIssue" }
+        gegenereerdOp: { type: string, format: date-time }

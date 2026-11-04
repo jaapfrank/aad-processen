@@ -1,0 +1,137 @@
+{
+  "id": "service-ontvangst",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Ontvangst",
+  "versie": "V1.2",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [7, 8], "importDatum": "2026-06-11", "importZekerheid": 0.9 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "inscanner", "naam": "Service medewerker inscanner", "kleur": "#F59E0B" },
+    { "id": "magazijn", "naam": "Magazijn", "kleur": "#10B981" },
+    { "id": "website", "naam": "Website", "kleur": "#8B5CF6" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Ontvangst" }],
+  "stappen": [
+    {
+      "id": "a",
+      "sectieId": "hoofd",
+      "nummer": "A",
+      "laneId": "klant",
+      "type": "marker",
+      "activiteit": "Meldt aan voor retour volgens Service – Aanvraagproces",
+      "opmerking": "Indien verzenden ontvangt het magazijn het pakket.",
+      "naarStap": "s1"
+    },
+    {
+      "id": "s1",
+      "sectieId": "hoofd",
+      "nummer": "1",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Retourneert product(en)",
+      "opmerking": "Indien retour aan balie wordt de retour vaak direct verwerkt door een service medewerker; het desbetreffende proces verwerking wordt dan gevolgd. Indien retour aan balie (post) gaat de post naar de service medewerker inscanner; het magazijn zit er dan niet tussen.",
+      "naarStap": "l"
+    },
+    {
+      "id": "l",
+      "sectieId": "hoofd",
+      "nummer": "L",
+      "laneId": "magazijn",
+      "type": "marker",
+      "activiteit": "Maakt schifting volgens proces logistiek",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2",
+      "sectieId": "hoofd",
+      "nummer": "2",
+      "laneId": "magazijn",
+      "type": "actie",
+      "activiteit": "Draagt service kar over aan Service",
+      "naarStap": "s3"
+    },
+    {
+      "id": "s3",
+      "sectieId": "hoofd",
+      "nummer": "3",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Sorteert artikelen per stroom",
+      "opmerking": "Sorteert op stroom Onderzoek en Service; sorteert serviceartikelen per categorie.",
+      "naarStap": "s4"
+    },
+    {
+      "id": "s4",
+      "sectieId": "hoofd",
+      "nummer": "4",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Pakt artikel uit",
+      "opmerking": "Zoekt RMA-nummer en controleert of serienummers overeenkomen. Maakt eventueel gebruik van referenties marketplaces.",
+      "naarStap": "s5"
+    },
+    {
+      "id": "s5",
+      "sectieId": "hoofd",
+      "nummer": "5",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Matcht artikel aan RMA-nummer",
+      "opmerking": "Controleert of serienummers overeenkomen.",
+      "naarStap": "s6"
+    },
+    {
+      "id": "s6",
+      "sectieId": "hoofd",
+      "nummer": "6",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Vult notities op RMA kaart aan en print de bon",
+      "opmerking": "Aanvullen van RMA-kaart m.b.t. staat product, afwijkingen en accessoires. De website en ERP synchroniseren RMA-gegevens.",
+      "naarStap": "s7"
+    },
+    {
+      "id": "s7",
+      "sectieId": "hoofd",
+      "nummer": "7",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Wijzigt status naar 'ontvangen'",
+      "zijnotitie": "ERP RMA status 'ontvangen'",
+      "erpStatus": "ontvangen",
+      "naarStap": "s8"
+    },
+    {
+      "id": "s8",
+      "sectieId": "hoofd",
+      "nummer": "8",
+      "laneId": "website",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Bevestiging ontvangen RMA-zending naar klant",
+      "naarStap": "s9"
+    },
+    {
+      "id": "s9",
+      "sectieId": "hoofd",
+      "nummer": "9",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Sorteert artikelen per verwerkingsstroom",
+      "opmerking": "Wordt gesorteerd op kar; elke stroom heeft een eigen kar: Status kar, TOV, Demo, Te testen.",
+      "naarStap": "e"
+    },
+    {
+      "id": "e",
+      "sectieId": "hoofd",
+      "nummer": "E",
+      "laneId": "inscanner",
+      "type": "eind",
+      "activiteit": "Eind van het proces. Start Service verwerking",
+      "naarProces": "service-testen"
+    }
+  ]
+}

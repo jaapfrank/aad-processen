@@ -1,0 +1,4 @@
+.state/
+backups/
+__pycache__/
+compose.override.json

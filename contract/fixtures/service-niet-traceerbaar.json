@@ -1,0 +1,141 @@
+{
+  "id": "service-niet-traceerbaar",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Niet traceerbaar product/zending",
+  "versie": "V1.1",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [9, 10], "importDatum": "2026-06-11", "importZekerheid": 0.88 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "inscanner", "naam": "Service medewerker inscanner", "kleur": "#F59E0B" },
+    { "id": "service", "naam": "Service medewerker", "kleur": "#D97706" },
+    { "id": "magazijn", "naam": "Magazijn", "kleur": "#10B981" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" },
+    { "id": "crm", "naam": "CRM", "kleur": "#64748B" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Niet traceerbaar product/zending" }],
+  "stappen": [
+    {
+      "id": "a",
+      "sectieId": "hoofd",
+      "nummer": "A",
+      "laneId": "inscanner",
+      "type": "marker",
+      "activiteit": "Proces Service – ontvangst: sortering artikelen per stroom",
+      "opmerking": "Niet-traceerbare pakketten/producten worden gesorteerd op de statuskar voor een tweedelijns beoordeling.",
+      "naarStap": "s1"
+    },
+    {
+      "id": "s1",
+      "sectieId": "hoofd",
+      "nummer": "1",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Draagt kar over aan Service medewerker",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2",
+      "sectieId": "hoofd",
+      "nummer": "2",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Controleert beschikbare informatie in ERP en CRM",
+      "opmerking": "Zoekt op/naar: RMA-nummer, serienummer, e-mailadres, naam, postcode, klantkaart, Track & Trace.",
+      "naarStap": "s3"
+    },
+    {
+      "id": "s3",
+      "sectieId": "hoofd",
+      "nummer": "3",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Plaatst artikel in 'lost and found' schap",
+      "voorwaarde": "klant onbekend",
+      "termijn": "opruiming minimaal na 2 maanden",
+      "opmerking": "Opruiming van het schap vindt meestal minimaal na 2 maanden plaats.",
+      "naarStap": "s4"
+    },
+    {
+      "id": "s4",
+      "sectieId": "hoofd",
+      "nummer": "4",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Maakt nieuw ticket",
+      "voorwaarde": "klant onbekend",
+      "opmerking": "Noteert beschikbare informatie in het ticket (trefwoorden), o.a. artikelsoort, barcode, serienummer, Track & Trace.",
+      "naarStap": "s5"
+    },
+    {
+      "id": "s5",
+      "sectieId": "hoofd",
+      "nummer": "5",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Controleert notitieveld/opmerkingenveld in order",
+      "naarStap": "s6"
+    },
+    {
+      "id": "s6",
+      "sectieId": "hoofd",
+      "nummer": "6",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Maakt notitie '*** retour op service' in de verkooporder",
+      "opmerking": "Op de RMA-kaart en in notities/opmerkingen in de order.",
+      "naarStap": "s7"
+    },
+    {
+      "id": "s7",
+      "sectieId": "hoofd",
+      "nummer": "7",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Controleert de RMA kaart of maakt nieuwe aan",
+      "waarschuwing": "Er kan ook fraude tussen zitten.",
+      "naarStap": "s8"
+    },
+    {
+      "id": "s8",
+      "sectieId": "hoofd",
+      "nummer": "8",
+      "laneId": "service",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Neemt contact op met klant",
+      "voorwaarde": "geen reden bekend",
+      "naarStap": "s9"
+    },
+    {
+      "id": "s9",
+      "sectieId": "hoofd",
+      "nummer": "9",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Verwerkt nieuwe informatie in RMA kaart",
+      "voorwaarde": "contact met klant",
+      "naarStap": "s10"
+    },
+    {
+      "id": "s10",
+      "sectieId": "hoofd",
+      "nummer": "10",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Sorteert artikelen per stroom",
+      "opmerking": "Wordt gesorteerd op kar; elke stroom heeft een eigen kar: TOV, Demo, Te testen.",
+      "naarStap": "e"
+    },
+    {
+      "id": "e",
+      "sectieId": "hoofd",
+      "nummer": "E",
+      "laneId": "service",
+      "type": "eind",
+      "activiteit": "Einde proces: wijst toe aan juiste locatie en start volgende werkstroom",
+      "naarProces": "service-testen"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "id": "service-testen",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Testen",
+  "versie": "V1.1",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [11, 12], "importDatum": "2026-06-11", "importZekerheid": 0.88 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "inscanner", "naam": "Service medewerker inscanner", "kleur": "#F59E0B" },
+    { "id": "tester", "naam": "Service medewerker tester", "kleur": "#D97706" },
+    { "id": "verwerker", "naam": "Service medewerker verwerker", "kleur": "#B45309" },
+    { "id": "website", "naam": "Website", "kleur": "#8B5CF6" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Testen" }],
+  "stappen": [
+    {
+      "id": "o",
+      "sectieId": "hoofd",
+      "nummer": "O",
+      "laneId": "inscanner",
+      "type": "marker",
+      "activiteit": "Proces Service – Ontvangst",
+      "opmerking": "Wordt gesorteerd op kar; elke stroom heeft een eigen kar: Tweedelijns beoordeling, TOV, Demo, Te testen.",
+      "naarStap": "s1"
+    },
+    {
+      "id": "s1",
+      "sectieId": "hoofd",
+      "nummer": "1",
+      "laneId": "inscanner",
+      "type": "actie",
+      "activiteit": "Draagt karren over",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2",
+      "sectieId": "hoofd",
+      "nummer": "2",
+      "laneId": "verwerker",
+      "type": "beslissing",
+      "activiteit": "Beoordeling of test/controle vereist is",
+      "toelichting": "Medewerker beoordeelt of het product het testproces moet doorlopen of direct verwerkt kan worden, afhankelijk van soort product, klacht en productwaarde.",
+      "naarStap": "v"
+    },
+    {
+      "id": "v",
+      "sectieId": "hoofd",
+      "nummer": "V",
+      "laneId": "verwerker",
+      "type": "subproces",
+      "activiteit": "Start proces Service verwerking",
+      "voorwaarde": "test/controle niet nodig is",
+      "naarProces": "service-verwerking",
+      "naarStap": "s3"
+    },
+    {
+      "id": "s3",
+      "sectieId": "hoofd",
+      "nummer": "3",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Visuele controle artikel en controle reden retour",
+      "voorwaarde": "geen werkplaatshandeling vereist",
+      "naarStap": "s4"
+    },
+    {
+      "id": "s4",
+      "sectieId": "hoofd",
+      "nummer": "4",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Maakt notitie en draagt over om te verwerken",
+      "voorwaarde": "nodig volgens instructie",
+      "naarStap": "s5"
+    },
+    {
+      "id": "s5",
+      "sectieId": "hoofd",
+      "nummer": "5",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Maakt foto's van artikel",
+      "fotoEisen": ["Monitoren", "Fysieke schade", "Onjuist serienummer", "AMD artikelen", "Fraude", "Inhoud onjuist (kan fraude zijn)", "APC artikelen"],
+      "opmerking": "Foto's nodig bij: monitoren, fysieke schade, onjuist serienummer, AMD-artikelen, fraude, inhoud onjuist (kan fraude zijn), APC-artikelen.",
+      "naarStap": "s6"
+    },
+    {
+      "id": "s6",
+      "sectieId": "hoofd",
+      "nummer": "6",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Voert werkplaatshandelingen uit",
+      "toelichting": "Dit is artikelafhankelijk; elk artikel heeft een andere testprocedure. Er wordt gecontroleerd of het artikel werkt en in welke staat het verkeert. Monitoren worden aangesloten, muizen ingeplugd en systemen aan testopstellingen gezet.",
+      "naarStap": "s7"
+    },
+    {
+      "id": "s7",
+      "sectieId": "hoofd",
+      "nummer": "7",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Noteert notities op RMA bon",
+      "naarStap": "s8"
+    },
+    {
+      "id": "s8",
+      "sectieId": "hoofd",
+      "nummer": "8",
+      "laneId": "tester",
+      "type": "actie",
+      "activiteit": "Draagt artikel inclusief RMA bon over",
+      "naarStap": "s9"
+    },
+    {
+      "id": "s9",
+      "sectieId": "hoofd",
+      "nummer": "9",
+      "laneId": "verwerker",
+      "type": "actie",
+      "activiteit": "Beoordeelt RMA bon, testresultaten en wens van klant",
+      "opmerking": "Niet defect waarbij informatie naar klant moet (extra kosten of informatie). Bij incorrecte conclusie klant: reactie naar klant — getest en niet gegrond.",
+      "naarStap": "s10"
+    },
+    {
+      "id": "s10",
+      "sectieId": "hoofd",
+      "nummer": "10",
+      "laneId": "verwerker",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Heeft contact met klant",
+      "voorwaarde": "extra informatie gewenst is of als wens klant niet mogelijk is",
+      "naarStap": "s11"
+    },
+    {
+      "id": "s11",
+      "sectieId": "hoofd",
+      "nummer": "11",
+      "laneId": "verwerker",
+      "type": "actie",
+      "activiteit": "Maakt notities op RMA kaart",
+      "opmerking": "Samenvatting van testresultaten en schapnummer waar het product wordt neergelegd indien in afwachting van reactie.",
+      "naarStap": "s12"
+    },
+    {
+      "id": "s12",
+      "sectieId": "hoofd",
+      "nummer": "12",
+      "laneId": "verwerker",
+      "type": "actie",
+      "activiteit": "Bepaalt vervolgtraject; zet in juiste status en opslaglocatie",
+      "opmerking": "Demo, retour klant of verwerking credit, defect, defect SK en niet-defect. De website synchroniseert RMA-gegevens; signaal naar klant met statusupdate via Magento.",
+      "naarStap": "e"
+    },
+    {
+      "id": "e",
+      "sectieId": "hoofd",
+      "nummer": "E",
+      "laneId": "verwerker",
+      "type": "eind",
+      "activiteit": "Eind van het proces. Start proces verwerking",
+      "opmerking": "Draagt over naar het juiste proces: Verwerking TOV (credit), Verwerking defect, Verwerking defect SK, Verwerking niet-defect, Verwerking credit, Verwerking demo of Verwerking retour zakelijk.",
+      "naarProces": "service-verwerking"
+    }
+  ]
+}

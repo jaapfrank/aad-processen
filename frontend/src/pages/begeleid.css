@@ -1,0 +1,17 @@
+.begeleid-selectie { display: flex; align-items: end; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0; }
+.begeleid-selectie > label:first-child { display: grid; gap: .4rem; flex: 1 1 18rem; }
+.begeleid-selectie input[type='search'] { width: 100%; padding: .7rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--surface); color: inherit; }
+.begeleid-context { margin-bottom: .5rem; }
+.begeleid-lokaal { color: var(--muted); font-size: .9rem; }
+.begeleid-melding { padding: 1rem; margin: 1rem 0; border: 1px solid var(--line); border-left: 4px solid #c56b10; border-radius: .5rem; background: var(--surface); }
+.begeleid-melding p { margin-top: .35rem; }
+.begeleid-checklist, .begeleid-beslissing { min-width: 0; border: 0; padding: 0; margin: 1.25rem 0; }
+.begeleid-checklist legend, .begeleid-beslissing legend { font-weight: 700; margin-bottom: .75rem; }
+.begeleid-checklist label { display: flex; align-items: start; gap: .6rem; padding: .5rem 0; }
+.begeleid-checklist input { margin-top: .2rem; }
+.begeleid-beslissing .bm-ingangen { margin-bottom: 0; }
+.begeleid-historie { margin: 1rem 0; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem; }
+.begeleid-historie summary { cursor: pointer; font-weight: 600; }
+.begeleid-historie li { padding: .3rem 0; }
+.bm-loop .bm-acties { flex-wrap: wrap; }
+.bm-loop button:disabled, .bm-ingangen button:disabled { opacity: .55; cursor: not-allowed; }

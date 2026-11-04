@@ -1,0 +1,112 @@
+{
+  "id": "service-controle-nieuwe-aanvragen",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Controle nieuwe aanvragen",
+  "versie": "V1.0",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [3, 4], "importDatum": "2026-06-11", "importZekerheid": 0.9 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "onderzoek", "naam": "Onderzoek", "kleur": "#0EA5E9" },
+    { "id": "service", "naam": "Klantenservice medewerker (Service)", "kleur": "#F59E0B" },
+    { "id": "website", "naam": "Website", "kleur": "#8B5CF6" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Controle nieuwe aanvragen" }],
+  "stappen": [
+    {
+      "id": "a",
+      "sectieId": "hoofd",
+      "nummer": "A",
+      "laneId": "klant",
+      "type": "marker",
+      "activiteit": "Volgt proces Service – Aanvraagproces",
+      "naarStap": "s1"
+    },
+    {
+      "id": "s1",
+      "sectieId": "hoofd",
+      "nummer": "1",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Controleert nieuwe retouraanvragen",
+      "toelichting": "Elke werkdag.",
+      "opmerking": "Controle van retouren o.b.v. voorwaarden op: prijs, retourreden, klachtomschrijving, type klant, soort product (Xenith/assemblage).",
+      "naarStap": "c"
+    },
+    {
+      "id": "c",
+      "sectieId": "hoofd",
+      "nummer": "C",
+      "laneId": "service",
+      "type": "subproces",
+      "activiteit": "Start proces CRMA B2B",
+      "voorwaarde": "CRMA B2B aanvraag",
+      "naarProces": "service-crma-aanvraag-b2b",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2",
+      "sectieId": "hoofd",
+      "nummer": "2",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Vraagt/verstrekt meer informatie",
+      "voorwaarde": "nodig",
+      "opmerking": "Vraagt meer info als de aanvraag niet volledig of onduidelijk is, of als extra bewijs vereist is. Verstrekt meer informatie indien de klant (mogelijk) op afstand geholpen kan worden. Adviseert \"rechtstreeks aanvragen\" bij fabrikant en deelt fabrikant-contactgegevens.",
+      "naarStap": "s3"
+    },
+    {
+      "id": "s3",
+      "sectieId": "hoofd",
+      "nummer": "3",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Vraagt RMA aan bij fabrikant",
+      "voorwaarde": "klant rechtstreeks wil aanvragen",
+      "naarStap": "s4"
+    },
+    {
+      "id": "s4",
+      "sectieId": "hoofd",
+      "nummer": "4",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Noteert aanvullende informatie",
+      "naarStap": "s5"
+    },
+    {
+      "id": "s5",
+      "sectieId": "hoofd",
+      "nummer": "5",
+      "laneId": "service",
+      "type": "bericht",
+      "doelLaneId": "onderzoek",
+      "activiteit": "Informeert afdeling Onderzoek",
+      "voorwaarde": "garantie bijna is vervallen",
+      "naarStap": "o"
+    },
+    {
+      "id": "o",
+      "sectieId": "hoofd",
+      "nummer": "O",
+      "laneId": "onderzoek",
+      "type": "subproces",
+      "activiteit": "Start proces Service onderzoek aanvraag",
+      "voorwaarde": "garantie bijna is vervallen",
+      "naarProces": "service-onderzoek-ontvangst",
+      "naarStap": "e"
+    },
+    {
+      "id": "e",
+      "sectieId": "hoofd",
+      "nummer": "E",
+      "laneId": "service",
+      "type": "eind",
+      "activiteit": "Eind van het proces. Start proces Service ontvangst",
+      "opmerking": "Afhankelijk van de aanvraag start ook Verwerking Defect/Credit (indien retourneren niet nodig) of Transportschade (indien transportschade).",
+      "naarProces": "service-ontvangst"
+    }
+  ]
+}

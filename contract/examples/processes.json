@@ -1,0 +1,42 @@
+[
+  {
+    "id": "service-aanvraagproces",
+    "hoofdproces": "Service",
+    "detailproces": "Service – Aanvraagproces",
+    "versie": "V1.1",
+    "status": "live",
+    "laatsteWijziging": "2026-05-21",
+    "aantalStappen": 18,
+    "koppelingen": ["service-controle-nieuwe-aanvragen", "service-ontvangst"]
+  },
+  {
+    "id": "service-controle-nieuwe-aanvragen",
+    "hoofdproces": "Service",
+    "detailproces": "Service – Controle nieuwe aanvragen",
+    "versie": "V1.0",
+    "status": "live",
+    "laatsteWijziging": "2026-05-21",
+    "aantalStappen": 5,
+    "koppelingen": ["service-crma-aanvraag-b2b", "service-onderzoek-aanvraag", "service-verwerking", "service-transportschade-klant", "service-ontvangst"]
+  },
+  {
+    "id": "service-ontvangst",
+    "hoofdproces": "Service",
+    "detailproces": "Service – Ontvangst",
+    "versie": "V1.2",
+    "status": "live",
+    "laatsteWijziging": "2026-05-21",
+    "aantalStappen": 9,
+    "koppelingen": ["service-verwerking"]
+  },
+  {
+    "id": "service-testen",
+    "hoofdproces": "Service",
+    "detailproces": "Service – Testen",
+    "versie": "V1.1",
+    "status": "live",
+    "laatsteWijziging": "2026-05-21",
+    "aantalStappen": 12,
+    "koppelingen": ["service-verwerking"]
+  }
+]

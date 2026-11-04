@@ -1,0 +1,37 @@
+{
+  "id": "service-verwerking-credit-wkoa",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Verwerking Credit flow (WKOA)",
+  "versie": "V1.1",
+  "status": "live",
+  "laatsteWijziging": "2025-06-20",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [15], "importDatum": "2026-06-11", "importZekerheid": 0.9 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "inscanner", "naam": "Service medewerker inscanner", "kleur": "#F59E0B" },
+    { "id": "magazijn", "naam": "Magazijn", "kleur": "#10B981" },
+    { "id": "website", "naam": "Website", "kleur": "#8B5CF6" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Credit flow (WKOA / TOV)" }],
+  "stappen": [
+    {
+      "id": "s1", "sectieId": "hoofd", "nummer": "1", "laneId": "inscanner", "type": "actie",
+      "activiteit": "Start verwerkingsflow TOV",
+      "voorwaarde": "TOV: product onaangetast, inclusief seal ongebroken",
+      "opmerking": "Legt product(en) op de TOV-kar.",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2", "sectieId": "hoofd", "nummer": "2", "laneId": "erp", "type": "actie",
+      "activiteit": "Doorloopt service-flow",
+      "toelichting": "Maatwerkflow voor Service: controleert originele order; order compleet?; wet koop op afstand-regels; wijzigt credit o.b.v. retour gestuurde artikelen volgens gedefinieerde spelregels; stuurt creditnota indien zakelijke klant (wordt uitgezocht); voorraadboekingen in taakwachtrij (snelheid systeem); logt stappen in serviceflow (ter controle).",
+      "naarStap": "t"
+    },
+    {
+      "id": "t", "sectieId": "hoofd", "nummer": "T", "laneId": "inscanner", "type": "eind",
+      "activiteit": "Eind van het proces. Start proces Service – Transferorders",
+      "naarProces": "transferorders"
+    }
+  ]
+}

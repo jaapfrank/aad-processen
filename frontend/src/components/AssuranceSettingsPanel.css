@@ -1,0 +1,333 @@
+.assurance-instellingen {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.assurance-instellingen-kop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.assurance-instellingen-kop h2,
+.assurance-instellingen-kop p,
+.assurance-ai-uitbreiding h3,
+.assurance-ai-uitbreiding p {
+  margin: 0;
+}
+
+.assurance-instellingen-kop h2 {
+  margin-top: 0.25rem;
+}
+
+.assurance-instellingen-kop p {
+  margin-top: 0.5rem;
+  max-width: 52rem;
+  color: var(--text-muted, #666875);
+}
+
+.assurance-catalogus-versie {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #dedfe4;
+  border-radius: 999px;
+  color: #696b77;
+  font-size: 0.78rem;
+  background: #fff;
+}
+
+.assurance-statusbalk {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid #dedfe4;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.assurance-statusbalk > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  border-right: 1px solid #e7e7eb;
+}
+
+.assurance-statusbalk > div:last-child {
+  border-right: 0;
+}
+
+.assurance-statusbalk span,
+.assurance-laatste-run span {
+  color: #6c6e78;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.assurance-statusbalk strong {
+  font-size: 0.95rem;
+}
+
+.assurance-statusbalk i {
+  color: #2d8646;
+  font-style: normal;
+}
+
+.assurance-instellingen-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 0.85fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.assurance-instellingen-grid > div {
+  min-width: 0;
+}
+
+.assurance-instellingen-grid h3 {
+  margin: 0 0 0.35rem;
+}
+
+.assurance-kaderkeuze {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.assurance-kaderkaart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid #dedfe4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.assurance-kaderkaart > label {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  cursor: pointer;
+}
+
+.assurance-kaderkaart.gekozen {
+  border-color: #5c8c67;
+  box-shadow: inset 0 0 0 1px #5c8c67;
+  background: #f5faf6;
+}
+
+.assurance-kaderkaart input {
+  margin-top: 0.18rem;
+}
+
+.assurance-kaderkaart > label > span {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.assurance-kaderkaart small {
+  color: #6b6d77;
+  line-height: 1.35;
+}
+
+.assurance-kaderkaart a {
+  grid-column: 2;
+  width: fit-content;
+  font-size: 0.78rem;
+}
+
+.assurance-ritme {
+  padding: 1.1rem;
+  border: 1px solid #dedfe4;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.assurance-ritme > p {
+  margin: 0 0 1rem;
+  color: #666875;
+}
+
+.assurance-ritme > h3:not(:first-child) {
+  margin-top: 1.35rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid #e4e4e8;
+}
+
+.assurance-ritme label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.assurance-ritme select {
+  width: 100%;
+}
+
+.assurance-slot {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  border-radius: 10px;
+  background: #f5f6f8;
+}
+
+.assurance-slot p {
+  margin: 0.2rem 0 0;
+  color: #666875;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.assurance-laatste-run {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border-left: 3px solid #5c8c67;
+  background: #f6f8f6;
+}
+
+.assurance-laatste-run small {
+  color: #6c6e78;
+}
+
+.assurance-opslaan {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  position: sticky;
+  bottom: 0.5rem;
+  z-index: 2;
+  padding: 0.75rem;
+  border: 1px solid #dedfe4;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 95%);
+  box-shadow: 0 8px 24px rgb(25 25 30 / 8%);
+  backdrop-filter: blur(8px);
+}
+
+.succes-tekst {
+  color: #286a3b;
+}
+
+.veld-fout {
+  color: #a12b2b;
+}
+
+.assurance-ai-uitbreiding {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed #b7b8c0;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.assurance-ai-uitbreiding > div {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.assurance-ai-uitbreiding p {
+  margin-top: 0.3rem;
+  color: #666875;
+}
+
+.assurance-ai-details {
+  border: 1px dashed #b7b8c0;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.assurance-ai-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.assurance-ai-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.assurance-ai-details > summary::after {
+  content: 'Openen';
+  margin-left: auto;
+  color: #686a73;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.assurance-ai-details[open] > summary::after {
+  content: 'Sluiten';
+}
+
+.assurance-ai-details > summary > span:not([aria-hidden]) {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.assurance-ai-details summary small {
+  color: #6b6d76;
+}
+
+.assurance-ai-details-inhoud {
+  padding: 0 0.8rem 0.8rem;
+}
+
+@media (max-width: 1000px) {
+  .assurance-statusbalk {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .assurance-statusbalk > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .assurance-statusbalk > div:nth-child(-n + 2) {
+    border-bottom: 1px solid #e7e7eb;
+  }
+
+  .assurance-instellingen-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .assurance-instellingen-kop,
+  .assurance-ai-uitbreiding {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .assurance-statusbalk,
+  .assurance-kaderkeuze {
+    grid-template-columns: 1fr;
+  }
+
+  .assurance-statusbalk > div {
+    border-right: 0;
+    border-bottom: 1px solid #e7e7eb;
+  }
+
+  .assurance-statusbalk > div:last-child {
+    border-bottom: 0;
+  }
+}

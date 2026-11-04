@@ -1,0 +1,733 @@
+.pv-root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: var(--ink, #1b1b1f);
+}
+
+.bouwer-preview,
+.be-preview-blok {
+  min-width: 0;
+}
+
+.pv-bovenbalk {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.pv-kiezer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.3rem;
+  width: fit-content;
+  max-width: 100%;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dedee3);
+  border-radius: 10px;
+}
+
+.pv-kiezer button {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted, #62626b);
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.38rem 0.58rem;
+  cursor: pointer;
+}
+
+.pv-kiezer button:hover {
+  color: var(--ink, #1b1b1f);
+  background: #fff3ea;
+}
+
+.pv-kiezer button.actief {
+  color: #9c3b06;
+  background: #fff0e5;
+  border-color: #f4bf9b;
+  font-weight: 700;
+}
+
+.pv-zoom-bediening {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  margin-left: auto;
+  white-space: nowrap;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dedee3);
+  border-radius: 10px;
+}
+
+.pv-zoom-bediening button {
+  min-width: 34px;
+  min-height: 32px;
+  padding: 0.28rem 0.48rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ink, #1b1b1f);
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pv-zoom-bediening button:hover:not(:disabled) {
+  color: #9c3b06;
+  background: #fff0e5;
+  border-color: #f4bf9b;
+}
+
+.pv-zoom-bediening button:focus-visible {
+  outline: 3px solid color-mix(in srgb, #ea5b0c 55%, transparent);
+  outline-offset: 1px;
+}
+
+.pv-zoom-bediening button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pv-zoom-bediening output {
+  min-width: 48px;
+  color: var(--muted, #62626b);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  text-align: center;
+}
+
+.pv-weergave {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.pv-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: auto;
+  /*
+   * Houd de brede diagrammen horizontaal binnen hun eigen canvas, maar laat
+   * een verticale wielbeweging aan de pagina door zodra het canvas boven of
+   * onder is aangekomen. `overscroll-behavior: contain` blokkeerde voorheen
+   * juist die scroll-keten wanneer de aanwijzer boven het witte SVG stond.
+   */
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  background: #fff;
+  border: 1px solid var(--line, #dedee3);
+  border-radius: 10px;
+  cursor: grab;
+}
+
+.pv-scroll.pv-pannend {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.pv-scroll .pv-svg-stap,
+.pv-scroll button,
+.pv-scroll a,
+.pv-scroll input,
+.pv-scroll select,
+.pv-scroll textarea {
+  cursor: pointer;
+}
+
+.pv-scroll-verticaal {
+  /* Lange SVG's blijven in zowel procesdetail als previews bedienbaar. */
+  max-height: min(72vh, 900px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pv-scroll:focus-visible {
+  outline: 3px solid color-mix(in srgb, #ea5b0c 55%, transparent);
+  outline-offset: 2px;
+}
+
+.be-preview-blok .pv-scroll-verticaal {
+  max-height: 54vh;
+}
+
+.pv-scroll svg {
+  display: block;
+  max-width: none;
+  margin-inline: auto;
+}
+
+.pv-svg-stap {
+  cursor: pointer;
+  outline: none;
+}
+
+.pv-svg-stap:focus-visible > :first-child {
+  stroke: #ea5b0c;
+  stroke-width: 3;
+}
+
+/* Brongetrouwe sequence-swimlane */
+.pv-fidelity {
+  background: #f2f2f4;
+  container-type: inline-size;
+}
+
+.pv-fidelity svg {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  text-rendering: geometricPrecision;
+}
+
+.pv-pagina-rand {
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-bedrijfsnaam {
+  font-size: var(--pv-bron-brand, 48px);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pv-meta {
+  fill: #111;
+  font-size: var(--pv-bron-meta, 32px);
+  font-weight: 400;
+}
+
+.pv-meta-klein {
+  fill: #111;
+  font-size: var(--pv-bron-klein, 16px);
+  font-weight: 400;
+}
+
+.pv-lane-naam {
+  fill: #111;
+  font-size: var(--pv-bron-lane, 27px);
+  font-weight: 400;
+}
+
+.pv-lane-kop,
+.pv-lifeline {
+  stroke: #808080;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-lane-kop-systeem {
+  stroke: #111;
+  stroke-dasharray: var(--pv-bron-systeem-dash, 2px 4px);
+  stroke-linecap: butt;
+}
+
+.pv-lane-naam-systeem {
+  font-weight: 400;
+}
+
+.pv-sectie-lijn {
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+  stroke-dasharray: var(--pv-bron-sectie-dash, 13px 10px);
+}
+
+.pv-sectie-naam {
+  fill: #111;
+  font-size: var(--pv-bron-body, 22px);
+  font-weight: 400;
+}
+
+.pv-stap-vierkant {
+  fill: #c0c0c0;
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-doelsymbool {
+  fill: #fff;
+}
+
+.pv-doelsymbool-gevuld {
+  fill: #c0c0c0;
+}
+
+.pv-doelsymbool-bericht {
+  fill: #c0c0c0;
+}
+
+.pv-marker {
+  fill: #fff;
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-systeemcirkel {
+  fill: #c0c0c0;
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-stapnummer {
+  fill: #111;
+  font-size: var(--pv-bron-body, 22px);
+  pointer-events: none;
+}
+
+.pv-bericht {
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-conditiewig {
+  fill: #fff;
+  stroke: #111;
+  stroke-width: var(--pv-bron-lijn, 1.9px);
+}
+
+.pv-activiteit {
+  fill: #111;
+  font-size: var(--pv-bron-body, 22px);
+  font-weight: 400;
+}
+
+.pv-vet {
+  font-weight: 700;
+}
+
+.pv-voorwaarde {
+  fill: #111;
+  font-size: var(--pv-bron-voorwaarde, 16px);
+  font-style: italic;
+}
+
+.pv-annotatie-leider {
+  stroke: #777;
+  stroke-width: var(--pv-bron-fijn, 0.65px);
+  stroke-dasharray: var(--pv-bron-fijn-dash, 2px 2px);
+}
+
+.pv-annotatie-haak,
+.pv-termijn-haak {
+  fill: none;
+  stroke: #555;
+  stroke-width: var(--pv-bron-fijn, 0.65px);
+}
+
+.pv-annotatie {
+  fill: #0000e8;
+  font-size: var(--pv-bron-body, 22px);
+  font-style: italic;
+}
+
+.pv-termijn-tekst {
+  fill: #111;
+  font-size: var(--pv-bron-body, 22px);
+}
+
+.pv-systeem-event-tekst {
+  fill: #111;
+  font-size: var(--pv-bron-body, 22px);
+  font-weight: 400;
+}
+
+.pv-systeem-event-lijn {
+  fill: none;
+}
+
+.pv-waarschuwing {
+  fill: #b42318;
+}
+
+.pv-annotatie-leeg {
+  opacity: 0.35;
+}
+
+/* Generieke diagramtypografie */
+.pv-diagram-titel {
+  fill: #202026;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Flowchart */
+.pv-flow-lijn {
+  fill: none;
+  stroke: #72727b;
+  stroke-width: 1.5;
+}
+
+.pv-flow-label {
+  fill: #9c520d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pv-flow-node {
+  fill: #fff;
+  stroke: #62626b;
+  stroke-width: 1.5;
+}
+
+.pv-flow-beslissing {
+  fill: #fff9ec;
+  stroke: #a9760a;
+}
+
+.pv-flow-nr {
+  fill: #9c3b06;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pv-flow-tekst {
+  fill: #202026;
+  font-size: 12px;
+}
+
+/* BPMN */
+.pv-bpmn-pool,
+.pv-bpmn-lane {
+  fill: #fff;
+  stroke: #7a8594;
+  stroke-width: 1.2;
+}
+
+.pv-bpmn-lane-naam {
+  fill: #263142;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pv-bpmn-flow {
+  fill: none;
+  stroke: #455164;
+  stroke-width: 1.4;
+}
+
+.pv-bpmn-task {
+  fill: #f9fcff;
+  stroke: #315f8e;
+  stroke-width: 1.5;
+}
+
+.pv-bpmn-subproces {
+  stroke-width: 2.3;
+}
+
+.pv-bpmn-event {
+  fill: #fff;
+  stroke: #28734a;
+  stroke-width: 2;
+}
+
+.pv-bpmn-eind {
+  stroke: #8b2934;
+  stroke-width: 4;
+}
+
+.pv-bpmn-gateway {
+  fill: #fff9ec;
+  stroke: #a9760a;
+  stroke-width: 1.8;
+}
+
+.pv-bpmn-x {
+  fill: #805b0d;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.pv-bpmn-nr,
+.pv-bpmn-plus {
+  fill: #315f8e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pv-bpmn-tekst {
+  fill: #1f2937;
+  font-size: 10px;
+}
+
+.pv-bpmn-label {
+  fill: #7a4a00;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.pv-doelen-titel {
+  fill: #4b5563;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pv-doelregel {
+  fill: #315f8e;
+  font-size: 11px;
+}
+
+.pv-doel-ongeldig {
+  fill: #a12920;
+  font-weight: 700;
+}
+
+/* SIPOC */
+.pv-sipoc-scroll {
+  max-height: min(72vh, 900px);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.pv-sipoc-schaal {
+  min-width: 960px;
+  transform-origin: left top;
+}
+
+.pv-sipoc-paneel {
+  overflow: hidden;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dedee3);
+  border-radius: 12px;
+}
+
+.pv-sipoc-paneel > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem 0.8rem;
+}
+
+.pv-sipoc-paneel h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.15rem;
+}
+
+.pv-kicker {
+  color: #c44a08;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pv-versie {
+  color: var(--muted, #62626b);
+  font-size: 0.78rem;
+}
+
+.pv-sipoc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 1px;
+  overflow-x: auto;
+  background: var(--line, #dedee3);
+  border-block: 1px solid var(--line, #dedee3);
+}
+
+.pv-sipoc-kolom {
+  min-height: 300px;
+  padding: 0.85rem;
+  background: var(--surface, #fff);
+}
+
+.pv-sipoc-kolom h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.7rem;
+  font-size: 0.9rem;
+}
+
+.pv-sipoc-kolom h3 span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  color: #fff;
+  background: #ea5b0c;
+}
+
+.pv-sipoc-kolom ol {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: sipoc;
+}
+
+.pv-sipoc-kolom li {
+  counter-increment: sipoc;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #ececf0;
+  border-radius: 7px;
+  background: #fbfbfc;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.pv-sipoc-p h3 span {
+  background: #315f8e;
+}
+
+.pv-sipoc-o h3 span {
+  background: #28734a;
+}
+
+.pv-sipoc-c h3 span {
+  background: #7046a5;
+}
+
+.pv-onbekend,
+.pv-uitleg {
+  color: var(--muted, #62626b);
+  font-size: 0.76rem;
+}
+
+.pv-uitleg {
+  margin: 0;
+  padding: 0.7rem 1rem;
+}
+
+/* Value-stream */
+.pv-vs-samenvatting {
+  fill: #62626b;
+  font-size: 12px;
+}
+
+.pv-vs-as {
+  stroke: #c9c9cf;
+  stroke-width: 3;
+}
+
+.pv-vs-verbinding,
+.pv-vs-overdracht {
+  stroke: #92929b;
+  stroke-width: 1.5;
+}
+
+.pv-vs-overdracht {
+  stroke: #ea5b0c;
+  stroke-width: 2.5;
+}
+
+.pv-vs-punt {
+  fill: #fff;
+  stroke: #62626b;
+  stroke-width: 2;
+}
+
+.pv-vs-handoff {
+  fill: #fff3ea;
+  stroke: #ea5b0c;
+  stroke-width: 3;
+}
+
+.pv-vs-leider {
+  stroke: #b6b6bd;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.pv-vs-kaart {
+  fill: #fff;
+  stroke: #d6d6dc;
+  stroke-width: 1.2;
+}
+
+.pv-vs-nr {
+  fill: #c44a08;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pv-vs-rol {
+  fill: #62626b;
+  font-size: 9px;
+}
+
+.pv-vs-tekst {
+  fill: #202026;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pv-vs-tijd {
+  fill: #28734a;
+  font-size: 9px;
+}
+
+@media (max-width: 720px) {
+  .pv-bovenbalk {
+    align-items: stretch;
+  }
+
+  .pv-kiezer {
+    width: 100%;
+  }
+
+  .pv-kiezer button {
+    flex: 1 1 30%;
+  }
+
+  .pv-zoom-bediening {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .pv-zoom-bediening button {
+    min-height: 40px;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  .pv-kiezer,
+  .pv-zoom-bediening {
+    display: none;
+  }
+
+  .pv-scroll,
+  .be-preview-blok .pv-scroll-verticaal {
+    max-height: none;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+  }
+
+  .pv-fidelity {
+    background: #fff;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .pv-fidelity svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 194mm !important;
+    max-height: 277mm !important;
+    margin: 0 auto;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .pv-sipoc-schaal {
+    zoom: 1 !important;
+  }
+}

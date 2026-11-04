@@ -1,0 +1,23 @@
+{
+  "version": "process-kaders-2026-07-27.1",
+  "frameworks": {
+    "iso9001": {
+      "manualControlIds": ["basis-governance", "qms-context"]
+    },
+    "iso27001": {
+      "manualControlIds": ["basis-governance", "isms-risk", "isms-access"]
+    },
+    "iso14001": {
+      "manualControlIds": ["basis-governance", "ems-aspects", "ems-obligations"]
+    },
+    "iso45001": {
+      "manualControlIds": ["basis-governance", "ohs-participation", "ohs-legal"]
+    },
+    "iso22301": {
+      "manualControlIds": ["basis-governance", "bcms-bia"]
+    },
+    "bpmn20": {
+      "manualControlIds": ["basis-governance"]
+    }
+  }
+}

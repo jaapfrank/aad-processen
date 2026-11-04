@@ -1,0 +1,124 @@
+.beheersing-assurance {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.beheersing-assurance .beheersing-sectiekop {
+  margin-top: 0;
+}
+
+.beheersing-assurance-meta,
+.beheersing-run-kop {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.beheersing-assurance-meta > span:not(.beheersing-status),
+.beheersing-run-kop > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.beheersing-assurance-meta > strong {
+  color: #276f3f;
+  font-size: 0.82rem;
+}
+
+.beheersing-run-kop {
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.beheersing-bevindingen {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.beheersing-bevindingen li {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 9px;
+  background: var(--bg);
+}
+
+.beheersing-bevindingen li.ernst-fout {
+  border-left-color: #b5362d;
+}
+
+.beheersing-bevindingen li.ernst-waarschuwing {
+  border-left-color: #c28a1b;
+}
+
+.beheersing-bevindingen li > span {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #6e4b08;
+  background: #fff0c8;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.beheersing-bevindingen li.ernst-fout > span {
+  color: #8b2a24;
+  background: #ffe0dc;
+}
+
+.beheersing-bevindingen li div {
+  min-width: 0;
+}
+
+.beheersing-bevindingen li p,
+.beheersing-geen-bevindingen,
+.beheersing-assurance-grens {
+  margin: 0.18rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.beheersing-bevindingen li a {
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.beheersing-geen-bevindingen {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.beheersing-assurance-grens {
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--line);
+}
+
+@media (max-width: 720px) {
+  .beheersing-bevindingen li {
+    grid-template-columns: 1.7rem minmax(0, 1fr);
+  }
+
+  .beheersing-bevindingen li a {
+    grid-column: 2;
+    white-space: normal;
+  }
+}

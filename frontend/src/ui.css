@@ -1,0 +1,100 @@
+/* Shared screen layout. Local diagrams and wide data tables retain their own scrolling. */
+:root { --on-primary: #fff; }
+button, input, select, textarea { font-family: inherit; }
+.main { min-width: 0; padding: 1.5rem 2rem; }
+.main > * { min-width: 0; }
+.main h1 { line-height: 1.25; letter-spacing: -0.025em; }
+.main p { line-height: 1.55; }
+.main :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { max-width: 100%; }
+.main textarea { font: inherit; line-height: 1.5; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--surface); }
+.main .btn-primair, .main .btn-secundair { min-height: 40px; text-align: center; line-height: 1.35; }
+.main :is(.btn-primair, .view-toggle button.active, .editor-mode-switch button.active),
+.pe-shell .pe-toolbar .pe-save { color: var(--on-primary); }
+.topbar { flex: 0 0 auto; min-height: 56px; height: auto; padding-block: 0.45rem; gap: 1rem; }
+.brand { min-width: 0; }
+.brand-title { line-height: 1.3; }
+.sidebar-links { display: flex; flex-direction: column; gap: 0.9rem; }
+.sidebar-toggle { display: none; }
+.skip-link { position: fixed; top: -6rem; left: 1rem; z-index: 1000; padding: 0.8rem; background: var(--surface); border: 2px solid var(--ink); }
+.skip-link:focus { top: 0.5rem; }
+.main :is(.kicker, .nc-bovenkop, .beheersing-kicker) { color: var(--procesgids-orange-dark); }
+.main :is(.bouwer-kop, .be-blok-kop, .detail-tools, .werkplek-kop) { gap: 0.75rem; flex-wrap: wrap; }
+.main .bouwer-kop > div { min-width: 0; max-width: 100%; }
+.main .bouwer-kop .detail-tools { display: flex; flex-wrap: wrap; max-width: 100%; }
+.main :is(.be-form, .be-inspector-grid) > * { min-width: 0; }
+.main .be-blok { width: 100%; }
+.ui-help { margin: 0.75rem 0 1rem; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+.ui-help > summary { cursor: pointer; color: var(--ink); font-weight: 600; padding: 0.5rem 0; }
+.ui-help[open] > summary { margin-bottom: 0.5rem; }
+.ui-help p { max-width: 75ch; margin: 0.5rem 0; }
+.table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.main .ai-diagram-pagina { max-width: 1100px; margin-inline: auto; }
+.ai-diagram-pagina .bouwer-kop { margin-bottom: 1rem; }
+.ai-diagram-pagina .bouwer-kop p { margin: 0.45rem 0 0; max-width: 70ch; }
+.ai-diagram-pagina .ai-tekstbestand { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.8rem 0; font-size: 0.85rem; }
+.ai-diagram-pagina .ai-tekstbestand input { min-width: 0; max-width: 100%; }
+.ai-diagram-pagina .detail-tools { margin-top: 0.75rem; }
+.main .nc-disclaimer { padding: 0.65rem 0.85rem; margin: 0.75rem 0 1rem; font-size: 0.85rem; }
+.main .nc-disclaimer p { margin: 0; }
+.main .nc-disclaimer h2 { margin: 0 0 0.25rem; font-size: 0.9rem; }
+.main .nc-paginakop p { margin-bottom: 0; }
+.main .iso-werkwijze { padding: 0.75rem 1rem; }
+.main .iso-werkwijze > summary { cursor: pointer; font-weight: 650; }
+.pe-shell { min-width: 0; }
+.pe-shell .pe-toolbar { flex-wrap: wrap; overflow: visible; align-items: center; gap: 0.5rem; }
+.pe-shell .pe-toolbar-group { flex-wrap: wrap; max-width: 100%; min-width: 0; }
+.pe-shell .pe-status { flex-wrap: wrap; white-space: normal; }
+.pe-shell .pe-workspace { min-height: 460px; grid-template-columns: minmax(0, 1fr) minmax(260px, 30%); }
+.pe-shell .pe-canvas { height: clamp(460px, 62dvh, 850px); min-height: 0; }
+.pe-shell .pe-inspector { min-width: 0; max-height: clamp(460px, 62dvh, 850px); overflow-y: auto; }
+.pe-shell:fullscreen .pe-canvas, .pe-shell:fullscreen .pe-inspector { height: calc(100dvh - 180px); max-height: none; }
+.main .beheer-intro { margin: 0.5rem 0 1rem; }
+.main .beheer-tabs { gap: 0.4rem; margin-bottom: 1rem; }
+.main .beheer-tabs button { min-height: 40px; }
+.main .ai-status-uitleg { max-width: 75ch; }
+.beheer-mobiel-keuze { display: none; }
+.main .zoek-form button { color: var(--on-primary); }
+.main .btn-primair:not(:disabled):hover, .main .zoek-form button:hover { color: #fff; }
+[data-thema='donker'] :is(a, .kicker, .nc-bovenkop, .beheersing-kicker, .nav-item.active, .topbar-settings.active) { color: color-mix(in srgb, var(--procesgids-orange), white 55%); }
+[data-thema='donker'] :is(.ux-formaten button.actief, .ux-richting label.actief) { background: #30291f; border-color: #a07d54; }
+[data-thema='donker'] :is(.dx-formaat, .dx-rapport) { background: var(--surface); }
+[data-thema='donker'] :is(.nc-sessie.actief, .nc-sessie:hover) { background: #30291f; }
+[data-thema='donker'] .nc-kadertype { color: #9ad7a5; }
+[data-thema='donker'] { --surface-soft: #25252e; }
+[data-thema='donker'] :is(.ai-productmodi em, .ai-status:not(.uitgeschakeld), .oauth-label) { color: #ebc476; }
+@media (max-width: 1050px) {
+  .main { padding: 1.25rem; }
+  .pe-shell .pe-workspace { grid-template-columns: minmax(0, 1fr); }
+  .pe-shell .pe-canvas { height: 460px; }
+  .pe-shell .pe-inspector { max-height: none; border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 720px) {
+  .main .beheer-tabs { display: none; }
+  .beheer-mobiel-keuze { display: grid; gap: 0.4rem; margin: 1rem 0; font-size: 0.85rem; font-weight: 600; }
+  .beheer-mobiel-keuze select { width: 100%; min-height: 44px; padding: 0.6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
+  .topbar { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+  .brand-title, .topbar .user { display: none; }
+  .topbar-right { gap: 0.5rem; }
+  .topbar .brand-logo { max-width: 120px; }
+  .app .sidebar { display: block; width: 100%; padding: 0; overflow: visible; border-right: 0; border-bottom: 1px solid var(--line); }
+  .sidebar-toggle { display: flex; align-items: center; gap: 0.65rem; width: 100%; padding: 0.65rem 1rem; min-height: 44px; background: var(--surface); border: 0; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .sidebar-toggle span:last-child { margin-left: auto; }
+  .sidebar .sidebar-links { display: none; }
+  .sidebar .sidebar-links.is-open { display: flex; max-height: calc(100dvh - 150px); overflow-y: auto; padding: 0.75rem 1rem; border-top: 1px solid var(--line); }
+  .sidebar .nav-groep { flex-direction: column; flex-shrink: 0; gap: 0.15rem; }
+  .sidebar .nav-groep + .nav-groep { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.75rem; }
+  .sidebar .nav-groep-label { display: block; }
+  .main { padding: 1rem; width: 100%; }
+  .main .bouwer-kop > div { width: 100%; }
+  .main .bouwer-kop .detail-tools { gap: 0.5rem; }
+  .main .bouwer-kop .detail-tools > * { flex: 1 1 auto; min-width: 0; }
+  .main .bouwer-kop .detail-tools .btn-primair { flex-basis: 100%; }
+  .main .be-form { grid-template-columns: minmax(0, 1fr); }
+  .pe-shell .pe-toolbar-group { border-right: 0; padding-right: 0; gap: 0.35rem; }
+  .pe-shell .pe-toolbar-group[aria-label='Stappen toevoegen'] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+  .pe-shell .pe-toolbar button { min-height: 40px; white-space: normal; }
+  .pe-shell .pe-canvas { height: 400px; }
+  .main .editor-mode-switch { display: flex; width: 100%; }
+  .main .editor-mode-switch button { flex: 1; min-width: 0; }
+  .main .beheersing-hero h1 { font-size: 1.5rem; }
+}

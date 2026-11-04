@@ -1,0 +1,50 @@
+{
+  "norm": "iso9001",
+  "hoofdprocessen": ["Service"],
+  "rijen": [
+    {
+      "procesId": "service-aanvraagproces",
+      "hoofdproces": "Service",
+      "detailproces": "Service – Aanvraagproces",
+      "norm": "iso9001",
+      "rol": "kern",
+      "clausules": ["8.2", "8.5", "8.7"],
+      "eigenaar": "Teamleider Service",
+      "status": "live",
+      "laatsteReview": "2026-05-21",
+      "volgendeReview": "2027-05-21",
+      "borging": []
+    },
+    {
+      "procesId": "service-ontvangst",
+      "hoofdproces": "Service",
+      "detailproces": "Service – Ontvangst",
+      "norm": "iso9001",
+      "rol": "ondersteunend",
+      "clausules": ["8.5.2", "8.6"],
+      "eigenaar": "Teamleider Magazijn",
+      "status": "live",
+      "laatsteReview": "2025-04-01",
+      "volgendeReview": "2026-04-01",
+      "borging": [
+        {
+          "procesId": "service-ontvangst",
+          "norm": "iso9001",
+          "signaal": "review-verlopen",
+          "ernst": "waarschuwing",
+          "bericht": "Volgende review (2026-04-01) is verstreken; herbeoordeling vereist voor borging."
+        }
+      ]
+    }
+  ],
+  "signalen": [
+    {
+      "procesId": "service-ontvangst",
+      "norm": "iso9001",
+      "signaal": "review-verlopen",
+      "ernst": "waarschuwing",
+      "bericht": "Volgende review (2026-04-01) is verstreken; herbeoordeling vereist voor borging."
+    }
+  ],
+  "gegenereerdOp": "2026-06-10T09:00:00Z"
+}

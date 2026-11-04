@@ -1,0 +1,16 @@
+.werkplek-kop { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.werkplek-kop h1 { margin: .3rem 0; }
+.werkplek-acties { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.werkplek-acties > a { display: block; padding: 1.25rem; border: 1px solid var(--border, #d3dbe4); border-radius: .7rem; text-decoration: none; color: inherit; background: var(--surface, #fff); }
+.werkplek-acties > a:hover { border-color: var(--procesgids-orange, #d97706); }
+.werkplek-acties > a > span { font-size: 1.5rem; }
+.werkplek-acties h2 { font-size: 1.05rem; margin: .5rem 0; }
+.werkplek-acties p { font-size: .93rem; line-height: 1.5; margin: 0; }
+.werkplek-tellers { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.werkplek-tellers > div { padding: 1rem; border: 1px solid var(--border, #d3dbe4); border-radius: .7rem; display: grid; gap: .25rem; }
+.werkplek-tellers strong { font-size: 1.8rem; }
+.werkplek-tellers span { font-size: .9rem; }
+.werkplek-kolommen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.2rem; }
+.werkplek .dash-lijst > li { display: grid; gap: .25rem; padding: .7rem 0; border-bottom: 1px solid var(--border, #d3dbe4); overflow-wrap: anywhere; }
+.werkplek-waarschuwing { padding: 1rem; border-left: 3px solid #b45309; margin: 1rem 0; }
+@media (max-width: 900px) { .werkplek-acties, .werkplek-kolommen { grid-template-columns: 1fr; } .werkplek-kop { flex-wrap: wrap; } }

@@ -1,0 +1,12 @@
+{
+  "services": {
+    "app-organisatie-a": {
+      "environment": {
+        "ServiceProcesgids__AuthMode": "entra",
+        "ServiceProcesgids__Entra__TenantId": "REPLACE_WITH_ORGANISATION_A_TENANT_ID",
+        "ServiceProcesgids__Entra__ClientId": "REPLACE_WITH_ORGANISATION_A_SPA_CLIENT_ID",
+        "ServiceProcesgids__Entra__Audience": "REPLACE_WITH_ORGANISATION_A_API_AUDIENCE"
+      }
+    }
+  }
+}

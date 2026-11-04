@@ -1,0 +1,40 @@
+{
+  "id": "transferorders",
+  "hoofdproces": "Service",
+  "detailproces": "Transferorders",
+  "versie": "V1.1",
+  "status": "live",
+  "laatsteWijziging": "2025-02-07",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [24], "importDatum": "2026-06-11", "importZekerheid": 0.9 },
+  "lanes": [
+    { "id": "service", "naam": "Service medewerker", "kleur": "#F59E0B" },
+    { "id": "magazijn", "naam": "Magazijn", "kleur": "#10B981" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Transferorders" }],
+  "stappen": [
+    { "id": "s1", "sectieId": "hoofd", "nummer": "1", "laneId": "service", "type": "actie",
+      "activiteit": "Pakt klaar-voor-transfer-kar", "naarStap": "s2" },
+    { "id": "s2", "sectieId": "hoofd", "nummer": "2", "laneId": "service", "type": "actie",
+      "activiteit": "Maakt nieuwe transferorder aan in ERP",
+      "toelichting": "Vult altijd in: transfercode (uit) IN_Service, transfercode (in) standaard, transitcode Transit, verzendwijze/expediteur/servicecode afhalen. Maatwerk in ERP.",
+      "naarStap": "s3" },
+    { "id": "s3", "sectieId": "hoofd", "nummer": "3", "laneId": "service", "type": "actie",
+      "activiteit": "Scant serienummers van artikelen in ERP",
+      "opmerking": "Herhalen tot de kar vol is; maximaal 50 producten per kar. Serienummers worden in het systeem gereserveerd (maatwerk in ERP).",
+      "naarStap": "s4" },
+    { "id": "s4", "sectieId": "hoofd", "nummer": "4", "laneId": "service", "type": "actie",
+      "activiteit": "Boekt verzending transferorder",
+      "opmerking": "Voorraad gaat van het servicemagazijn naar transit in ERP; past de inkoopbehoefte aan op basis van de voorraadwijziging.",
+      "naarStap": "s5" },
+    { "id": "s5", "sectieId": "hoofd", "nummer": "5", "laneId": "service", "type": "actie",
+      "activiteit": "Noteert transfernummer op kar", "naarStap": "s6" },
+    { "id": "s6", "sectieId": "hoofd", "nummer": "6", "laneId": "service", "type": "bericht", "doelLaneId": "magazijn",
+      "activiteit": "Draagt kar over naar magazijn",
+      "termijn": "binnen 24 uur verwerken",
+      "waarschuwing": "Magazijn (non-demo) moet binnen 24 uur verwerken i.v.m. de leverbelofte aan de klant.",
+      "naarStap": "e" },
+    { "id": "e", "sectieId": "hoofd", "nummer": "E", "laneId": "magazijn", "type": "eind",
+      "activiteit": "Einde proces. Start proces Logistiek (inscan en wegleggen)" }
+  ]
+}

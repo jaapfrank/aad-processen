@@ -1,0 +1,292 @@
+{
+  "id": "service-aanvraagproces",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Aanvraagproces",
+  "versie": "V1.1",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": {
+    "type": "pdf-import",
+    "bestand": "voorbeeld-serviceproces.pdf",
+    "paginas": [1, 2],
+    "importDatum": "2026-06-09",
+    "importZekerheid": 0.95
+  },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "magazijn", "naam": "Magazijn", "kleur": "#10B981" },
+    { "id": "service", "naam": "(Klanten)service medewerker", "kleur": "#F59E0B" },
+    { "id": "website", "naam": "Website", "kleur": "#8B5CF6" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [
+    { "id": "web", "naam": "Website" },
+    { "id": "intern", "naam": "Intern medewerker (telefonisch, e-mail, balie)" }
+  ],
+  "stappen": [
+    {
+      "id": "w1",
+      "sectieId": "web",
+      "nummer": "1",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Dient retouraanvraag in",
+      "interactieDoelLaneId": "website",
+      "toelichting": "Volgens instructie op website\nKiest retourreden (WKOA), verkeerd geleverd, defect, verkeerd besteld, staat van product, gewenste afhandeling. Selecteert serienummer.",
+      "opmerking": "De website maakt een RMA-nummer aan en synchroniseert RMA-gegevens met ERP.",
+      "zijnotitie": "ERP RMA status 'controle'",
+      "erpStatus": "controle",
+      "systeemGebeurtenissen": [
+        {
+          "id": "w1-rma-aanmaken",
+          "type": "actie",
+          "laneId": "website",
+          "activiteit": "Maakt RMA nummer aan"
+        },
+        {
+          "id": "w1-rma-synchroniseren",
+          "type": "synchronisatie",
+          "laneId": "website",
+          "doelLaneId": "erp",
+          "activiteit": "Synchroniseert RMA gegevens"
+        },
+        {
+          "id": "w1-status-controle",
+          "type": "status",
+          "laneId": "erp",
+          "activiteit": "RMA status ‘controle’"
+        }
+      ],
+      "naarStap": "w2"
+    },
+    {
+      "id": "w2",
+      "sectieId": "web",
+      "nummer": "2",
+      "laneId": "website",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Stuurt RMA-nummer en status ‘controle’ bericht",
+      "naarStap": "wSC"
+    },
+    {
+      "id": "wSC",
+      "sectieId": "web",
+      "nummer": "SC",
+      "laneId": "service",
+      "type": "subproces",
+      "activiteit": "Start proces Service – controle nieuwe aanvragen",
+      "naarProces": "service-controle-nieuwe-aanvragen",
+      "naarStap": "w3"
+    },
+    {
+      "id": "w3",
+      "sectieId": "web",
+      "nummer": "3",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Zet RMA status door naar volgende",
+      "interactieDoelLaneId": "erp",
+      "opmerking": "De website synchroniseert RMA-gegevens met ERP.",
+      "zijnotitie": "ERP RMA status 'invoer compleet'",
+      "erpStatus": "invoer compleet",
+      "systeemGebeurtenissen": [
+        {
+          "id": "w3-status-invoer-compleet",
+          "type": "status",
+          "laneId": "erp",
+          "activiteit": "RMA status ‘invoer compleet’"
+        },
+        {
+          "id": "w3-rma-synchroniseren",
+          "type": "synchronisatie",
+          "laneId": "website",
+          "doelLaneId": "erp",
+          "activiteit": "Synchroniseert RMA gegevens"
+        }
+      ],
+      "naarStap": "w4"
+    },
+    {
+      "id": "w4",
+      "sectieId": "web",
+      "nummer": "4",
+      "laneId": "website",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Stuurt RMA-nummer en retourinstructies",
+      "naarStap": "w5"
+    },
+    {
+      "id": "w5",
+      "sectieId": "web",
+      "nummer": "5",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Stuurt artikel op of brengt artikel langs onder vermelding van RMA-nummer",
+      "interactieDoelLaneId": "magazijn",
+      "naarStap": "wE"
+    },
+    {
+      "id": "wE",
+      "sectieId": "web",
+      "nummer": "E",
+      "laneId": "magazijn",
+      "type": "eind",
+      "activiteit": "Eind van het proces. Start proces Service ontvangst",
+      "naarProces": "service-ontvangst"
+    },
+    {
+      "id": "i1",
+      "sectieId": "intern",
+      "nummer": "1",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Geeft aan iets retour te willen sturen",
+      "interactieDoelLaneId": "service",
+      "toelichting": "Dit kan telefonisch, aan de balie of per e-mail zijn",
+      "opmerking": "Dit kan telefonisch, aan de balie of per e-mail zijn",
+      "naarStap": "i2"
+    },
+    {
+      "id": "i2",
+      "sectieId": "intern",
+      "nummer": "2",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Vraagt informatie op",
+      "interactieDoelLaneId": "klant",
+      "voorwaarde": "Indien extra informatie nodig",
+      "toelichting": "- Retourreden (WKOA),\n- verkeerd geleverd,\n- defect, verkeerd besteld,\n- staat van product, gewenste afhandeling.",
+      "opmerking": "De medewerker vraagt onder andere naar: retourreden (WKOA), verkeerd geleverd, defect, verkeerd besteld, staat van product, gewenste afhandeling.",
+      "naarStap": "i3"
+    },
+    {
+      "id": "i3",
+      "sectieId": "intern",
+      "nummer": "3",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Controleert of klant account heeft en zoekt orderinformatie",
+      "interactieDoelLaneId": "erp",
+      "naarStap": "i4"
+    },
+    {
+      "id": "i4",
+      "sectieId": "intern",
+      "nummer": "4",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Maakt RMA-nummer aan",
+      "interactieDoelLaneId": "erp",
+      "zijnotitie": "ERP status 'nieuw'",
+      "erpStatus": "nieuw",
+      "systeemGebeurtenissen": [
+        {
+          "id": "i4-status-nieuw",
+          "type": "status",
+          "laneId": "erp",
+          "activiteit": "Status ‘nieuw’"
+        }
+      ],
+      "naarStap": "i5"
+    },
+    {
+      "id": "i5",
+      "sectieId": "intern",
+      "nummer": "5",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Zet retourmelding door naar status ‘controle’",
+      "interactieDoelLaneId": "erp",
+      "zijnotitie": "ERP RMA status 'controle'",
+      "erpStatus": "controle",
+      "systeemGebeurtenissen": [
+        {
+          "id": "i5-status-controle",
+          "type": "status",
+          "laneId": "erp",
+          "activiteit": "RMA status ‘controle’"
+        }
+      ],
+      "naarStap": "i6"
+    },
+    {
+      "id": "i6",
+      "sectieId": "intern",
+      "nummer": "6",
+      "laneId": "website",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Stuurt RMA-nummer en status 'controle' bericht",
+      "naarStap": "iSC"
+    },
+    {
+      "id": "iSC",
+      "sectieId": "intern",
+      "nummer": "SC",
+      "laneId": "service",
+      "type": "subproces",
+      "activiteit": "Start proces Service – controle nieuwe aanvragen",
+      "naarProces": "service-controle-nieuwe-aanvragen",
+      "naarStap": "i7"
+    },
+    {
+      "id": "i7",
+      "sectieId": "intern",
+      "nummer": "7",
+      "laneId": "service",
+      "type": "actie",
+      "activiteit": "Zet RMA status door naar volgende",
+      "interactieDoelLaneId": "erp",
+      "opmerking": "De website synchroniseert RMA-gegevens met ERP.",
+      "zijnotitie": "ERP RMA status 'invoer compleet'",
+      "erpStatus": "invoer compleet",
+      "systeemGebeurtenissen": [
+        {
+          "id": "i7-status-invoer-compleet",
+          "type": "status",
+          "laneId": "erp",
+          "activiteit": "RMA status ‘invoer compleet’"
+        },
+        {
+          "id": "i7-rma-synchroniseren",
+          "type": "synchronisatie",
+          "laneId": "website",
+          "doelLaneId": "erp",
+          "activiteit": "Synchroniseert RMA gegevens"
+        }
+      ],
+      "naarStap": "i8"
+    },
+    {
+      "id": "i8",
+      "sectieId": "intern",
+      "nummer": "8",
+      "laneId": "website",
+      "type": "bericht",
+      "doelLaneId": "klant",
+      "activiteit": "Stuurt RMA-nummer en retourinstructies",
+      "naarStap": "i9"
+    },
+    {
+      "id": "i9",
+      "sectieId": "intern",
+      "nummer": "9",
+      "laneId": "klant",
+      "type": "actie",
+      "activiteit": "Stuurt artikel op onder vermelding van RMA-nummer",
+      "interactieDoelLaneId": "magazijn",
+      "naarStap": "iE"
+    },
+    {
+      "id": "iE",
+      "sectieId": "intern",
+      "nummer": "E",
+      "laneId": "magazijn",
+      "type": "eind",
+      "activiteit": "Eind van het proces. Start proces Service ontvangst",
+      "naarProces": "service-ontvangst"
+    }
+  ]
+}

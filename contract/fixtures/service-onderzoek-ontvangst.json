@@ -1,0 +1,32 @@
+{
+  "id": "service-onderzoek-ontvangst",
+  "hoofdproces": "Service",
+  "detailproces": "Service Onderzoek (1) – Ontvangst (vanuit werkplaats)",
+  "versie": "V1.0",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [29], "importDatum": "2026-06-11", "importZekerheid": 0.85 },
+  "lanes": [
+    { "id": "service", "naam": "Service medewerker", "kleur": "#F59E0B" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Onderzoek – ontvangst" }],
+  "stappen": [
+    { "id": "s0", "sectieId": "hoofd", "nummer": "S", "laneId": "service", "type": "marker",
+      "activiteit": "Start proces Service verwerking",
+      "opmerking": "Uit de verwerking komen producten die op voorraad komen en verplaatst gaan worden.", "naarStap": "s1" },
+    { "id": "s1", "sectieId": "hoofd", "nummer": "1", "laneId": "service", "type": "actie",
+      "activiteit": "Plaatst artikel in SK-schap onderzoek", "voorwaarde": "SK", "naarStap": "s2" },
+    { "id": "s2", "sectieId": "hoofd", "nummer": "2", "laneId": "service", "type": "actie",
+      "activiteit": "Boekt artikel op tijdelijke servicelocatie (kar) in ERP",
+      "opmerking": "Alle producten die terug naar leverancier of fabrikant gaan worden tijdelijk op locatie 'Defect' geboekt; fysiek is dit een kar.", "naarStap": "s3" },
+    { "id": "s3", "sectieId": "hoofd", "nummer": "3", "laneId": "service", "type": "actie",
+      "activiteit": "Scant artikel of (meldings)bon op locatie service in ERP", "naarStap": "s4" },
+    { "id": "s4", "sectieId": "hoofd", "nummer": "4", "laneId": "service", "type": "actie",
+      "activiteit": "Verplaatst in juiste schap 'onderzoek'",
+      "opmerking": "Elk retourkanaal heeft een eigen servicelocatie. Plaatst artikel én meldingsbon; scan product en locatie bij service.", "naarStap": "e" },
+    { "id": "e", "sectieId": "hoofd", "nummer": "E", "laneId": "service", "type": "eind",
+      "activiteit": "Einde proces. Start proces Service onderzoek aanmelden",
+      "naarProces": "service-onderzoek-aanmelden" }
+  ]
+}

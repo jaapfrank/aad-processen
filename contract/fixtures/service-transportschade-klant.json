@@ -1,0 +1,154 @@
+{
+  "id": "service-transportschade-klant",
+  "hoofdproces": "Service",
+  "detailproces": "Service – Transportschade klant",
+  "versie": "V1.3",
+  "status": "live",
+  "laatsteWijziging": "2026-05-21",
+  "bron": { "type": "pdf-import", "bestand": "voorbeeld-serviceproces.pdf", "paginas": [13, 14], "importDatum": "2026-06-11", "importZekerheid": 0.88 },
+  "lanes": [
+    { "id": "klant", "naam": "Klant", "kleur": "#3B82F6" },
+    { "id": "service", "naam": "Service medewerker", "kleur": "#F59E0B" },
+    { "id": "ksm", "naam": "Klantenservice medewerker (Service)", "kleur": "#D97706" },
+    { "id": "transporteur", "naam": "Transporteur", "kleur": "#0EA5E9" },
+    { "id": "finadmin", "naam": "Financiële administratie", "kleur": "#16A34A" },
+    { "id": "teamleider", "naam": "Teamleider Service", "kleur": "#9333EA" },
+    { "id": "erp", "naam": "ERP", "kleur": "#6B7280" }
+  ],
+  "secties": [{ "id": "hoofd", "naam": "Transportschade van Voorbeeldbedrijf naar klant" }],
+  "stappen": [
+    {
+      "id": "s1", "sectieId": "hoofd", "nummer": "1", "laneId": "klant", "type": "actie",
+      "activiteit": "Meldt schade aan verpakking of artikel",
+      "toelichting": "Dit kan telefonisch, via e-mail of via de website.",
+      "opmerking": "Transportschade van klant naar Voorbeeldbedrijf is de verantwoordelijkheid van de klant: die moet contact opnemen met de transporteur; dat wordt afgehandeld als regulier defect buiten garantie.",
+      "termijn": "binnen 6 dagen na levering",
+      "waarschuwing": "Melding moet binnen 6 dagen na levering, minimaal met Track & Trace-code.",
+      "naarStap": "s2"
+    },
+    {
+      "id": "s2", "sectieId": "hoofd", "nummer": "2", "laneId": "service", "type": "bericht", "doelLaneId": "transporteur",
+      "activiteit": "Meldt schade bij transporteur",
+      "opmerking": "Volgens werkinstructies of eisen van de transporteur.",
+      "naarStap": "s3"
+    },
+    {
+      "id": "s3", "sectieId": "hoofd", "nummer": "3", "laneId": "ksm", "type": "bericht", "doelLaneId": "klant",
+      "activiteit": "Vraagt foto's en gegevens",
+      "naarStap": "s4"
+    },
+    {
+      "id": "s4", "sectieId": "hoofd", "nummer": "4", "laneId": "klant", "type": "actie",
+      "activiteit": "Stuurt gegevens toe",
+      "naarStap": "s5"
+    },
+    {
+      "id": "s5", "sectieId": "hoofd", "nummer": "5", "laneId": "ksm", "type": "actie",
+      "activiteit": "Maakt RMA aan en vult aan met als onderwerp 'TPS'",
+      "naarStap": "s6"
+    },
+    {
+      "id": "s6", "sectieId": "hoofd", "nummer": "6", "laneId": "service", "type": "actie",
+      "activiteit": "Vult schademelding aan",
+      "voorwaarde": "retourneren van product niet nodig is: ga direct naar credit (C) of defect (D)",
+      "naarStap": "s7"
+    },
+    {
+      "id": "s7", "sectieId": "hoofd", "nummer": "7", "laneId": "service", "type": "bericht", "doelLaneId": "klant",
+      "activiteit": "Verzoekt om artikel retour te sturen onder vermelding van RMA-nummer",
+      "naarStap": "s8"
+    },
+    {
+      "id": "s8", "sectieId": "hoofd", "nummer": "8", "laneId": "klant", "type": "actie",
+      "activiteit": "Stuurt artikel retour",
+      "naarStap": "o"
+    },
+    {
+      "id": "o", "sectieId": "hoofd", "nummer": "O", "laneId": "service", "type": "subproces",
+      "activiteit": "Start proces Ontvangst",
+      "naarProces": "service-ontvangst",
+      "naarStap": "t"
+    },
+    {
+      "id": "t", "sectieId": "hoofd", "nummer": "T", "laneId": "service", "type": "subproces",
+      "activiteit": "Start proces Test",
+      "opmerking": "Deze stappen worden niet per se door dezelfde persoon uitgevoerd.",
+      "naarProces": "service-testen",
+      "naarStap": "s9"
+    },
+    {
+      "id": "s9", "sectieId": "hoofd", "nummer": "9", "laneId": "service", "type": "beslissing",
+      "activiteit": "Beoordeelt beschikbare informatie en wens klant",
+      "toelichting": "Wordt gedaan door een ervaren service-medewerker (TPS-expert). Drie mogelijke vervolgstromen: credit, afhandeling defect, afhandeling niet-defect.",
+      "naarStap": "c"
+    },
+    {
+      "id": "c", "sectieId": "hoofd", "nummer": "C", "laneId": "service", "type": "subproces",
+      "activiteit": "Start proces credit",
+      "voorwaarde": "afhandeling credit",
+      "naarProces": "service-verwerking-credit-wkoa",
+      "naarStap": "n"
+    },
+    {
+      "id": "n", "sectieId": "hoofd", "nummer": "N", "laneId": "service", "type": "subproces",
+      "activiteit": "Start proces niet-defect",
+      "voorwaarde": "afhandeling niet-defect",
+      "naarProces": "service-verwerking-niet-defect",
+      "naarStap": "d"
+    },
+    {
+      "id": "d", "sectieId": "hoofd", "nummer": "D", "laneId": "service", "type": "subproces",
+      "activiteit": "Start proces verwerking defect",
+      "voorwaarde": "afhandeling defect",
+      "opmerking": "Voor afhandeling TPS wordt volgens vaste instructies gewerkt; die wijken af van de reguliere stroom (bv. verwerking bedrag op grootboek i.p.v. op product).",
+      "naarProces": "service-verwerking-defect",
+      "naarStap": "s10"
+    },
+    {
+      "id": "s10", "sectieId": "hoofd", "nummer": "10", "laneId": "service", "type": "bericht", "doelLaneId": "finadmin",
+      "activiteit": "Informeert financiële administratie over afhandeling TPS",
+      "naarStap": "s11"
+    },
+    {
+      "id": "s11", "sectieId": "hoofd", "nummer": "11", "laneId": "service", "type": "actie",
+      "activiteit": "Legt beschadigd artikel in TPS-schap",
+      "termijn": "minimaal 3 maanden bewaren",
+      "waarschuwing": "Artikel minimaal 3 maanden bewaren als bewijslast voor het onderzoek van de transporteur.",
+      "naarStap": "s12"
+    },
+    {
+      "id": "s12", "sectieId": "hoofd", "nummer": "12", "laneId": "teamleider", "type": "actie",
+      "activiteit": "Controleert ouderdom van artikelen in TPS-schap",
+      "termijn": "minimaal 1x per kwartaal",
+      "naarStap": "s13"
+    },
+    {
+      "id": "s13", "sectieId": "hoofd", "nummer": "13", "laneId": "service", "type": "actie",
+      "activiteit": "Boekt voorraad af",
+      "voorwaarde": "ouder dan 3 maanden",
+      "opmerking": "D.m.v. inventarisatiedagboek; periodiek ± 3 maanden.",
+      "naarStap": "s14"
+    },
+    {
+      "id": "s14", "sectieId": "hoofd", "nummer": "14", "laneId": "ksm", "type": "actie",
+      "activiteit": "Controleert periodiek openstaande Transportschade-tickets",
+      "opmerking": "Ervaren TPS-expert controleert zowel ERP als e-mail.",
+      "naarStap": "s15"
+    },
+    {
+      "id": "s15", "sectieId": "hoofd", "nummer": "15", "laneId": "service", "type": "actie",
+      "activiteit": "Gaat na of oude RMA's kunnen worden gesloten",
+      "voorwaarde": "ouder dan een maand",
+      "naarStap": "s16"
+    },
+    {
+      "id": "s16", "sectieId": "hoofd", "nummer": "16", "laneId": "ksm", "type": "actie",
+      "activiteit": "Sluit tickets en verplaatst dossier naar gesloten tickets",
+      "naarStap": "e"
+    },
+    {
+      "id": "e", "sectieId": "hoofd", "nummer": "E", "laneId": "service", "type": "eind",
+      "activiteit": "Eind van het proces"
+    }
+  ]
+}
