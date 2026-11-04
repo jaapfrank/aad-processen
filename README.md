@@ -72,15 +72,27 @@ De beelden komen uit de lokale demo. Klik op een screenshot om het op ware groot
 
 ## Probeer de demo
 
-Installeer [Node.js 24](https://nodejs.org/) en voer vanuit de repository uit:
+De demo draait op je eigen computer. Download eerst de broncode en installeer [Node.js 24](https://nodejs.org/), inclusief npm. Voor het downloaden en installeren heb je internet nodig.
+
+1. Kies op GitHub **Code → Download ZIP** en pak het bestand uit. Open een terminal in de uitgepakte map `aad-processen-main`, waar de map `frontend` staat. [Download de ZIP](https://github.com/jaapfrank/aad-processen/archive/refs/heads/main.zip)
+2. Voer deze drie opdrachten één voor één uit. `npm ci` downloadt de vastgelegde frontendpakketten. `npm run dev:demo` start de lokale webserver.
+
+   ```bash
+   cd frontend
+   npm ci
+   npm run dev:demo
+   ```
+
+3. Laat de terminal open en open het adres bij **Local** in je browser, meestal `http://localhost:5173`. Stop de demo met **Ctrl+C** in de terminal.
+
+Gebruik je Git? Dan kun je stap 1 uitvoeren met:
 
 ```bash
-cd frontend
-npm ci
-npm run dev:demo
+git clone https://github.com/jaapfrank/aad-processen.git
+cd aad-processen
 ```
 
-Open het lokale adres dat Vite toont. Kies op het overzicht **Service – Aanvraagproces**, wissel tussen **Visualisatie** en **Tabel** en volg daarna een proces via **Stap voor stap**. Open **Procesatlas** om de samenhang tussen processen te bekijken. De demo draait met meegeleverde voorbeeldgegevens, zonder backend of account. Open **AI-assistent** of **AI-procesontwerp** om de schermen voor vragen en procesontwerp te bekijken.
+Kies op het overzicht **Service – Aanvraagproces** en wissel tussen **Visualisatie** en **Tabel**. Probeer **Stap voor stap** en **Procesatlas**. De demo gebruikt meegeleverde voorbeeldgegevens en heeft geen backend of account nodig. De AI-schermen zijn te bekijken. Voor echte AI-aanroepen heb je de backend met een ingestelde AI-provider nodig.
 
 ## Onder de motorkap
 
